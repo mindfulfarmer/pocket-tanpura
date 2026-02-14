@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Pocket Tanpura</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pocket Tanpura">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <style>
+        /* Dark Mode (Default) */
+        :root {
+            --bg-base: #0f172a;
+            --shape-1: #3b82f6; 
+            --shape-2: #8b5cf6; 
+            --glass-bg: rgba(30, 30, 40, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-color: #f8fafc;
+            --text-muted: #cbd5e1;
+            --accent-color: #d4af37; 
+            --control-bg: rgba(0, 0, 0, 0.3);
+            --control-border: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Light Mode */
+        [data-theme="light"] {
+            --bg-base: #f1f5f9;
+            --shape-1: #ff9a9e; 
+            --shape-2: #a18cd1; 
+            --glass-bg: rgba(255, 255, 255, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --text-color: #1e293b;
+            --text-muted: #475569;
+            --accent-color: #d35400; 
+            --control-bg: rgba(255, 255, 255, 0.4);
+            --control-border: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Strictly 100vh */
+            overflow: hidden; /* NO SCROLLING */
+            padding: 1rem;
+            position: relative;
+            transition: background-color 0.4s ease;
+        }
+
+        /* Animated Background Blobs */
+        .bg-shape {
+            position: absolute;
+            filter: blur(80px);
+            z-index: -1;
+            border-radius: 50%;
+            animation: float 10s infinite alternate ease-in-out;
+            opacity: 0.8;
+        }
+        .shape1 { width: 350px; height: 350px; background: var(--shape-1); top: -100px; left: -100px; }
+        .shape2 { width: 400px; height: 400px; background: var(--shape-2); bottom: -150px; right: -100px; animation-delay: -5s; }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(30px) scale(1.1); }
+        }
+
+        /* Glassmorphism Containers */
+        .app-container, .modal-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border-radius: 24px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 1.5rem; /* Tightened for comfort without scrolling */
+            z-index: 1;
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 10px;
+        }
+
+        h1 { font-weight: 600; letter-spacing: 1px; color: var(--accent-color); font-size: 1.6rem; }
+
+        .icon-btn {
+            background: var(--control-bg);
+            border: 1px solid var(--control-border);
+            color: var(--text-color);
+            border-radius: 50%;
+            width: 40px; height: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            transition: transform 0.2s;
+        }
+        .icon-btn:active { transform: scale(0.9); }
+
+        p.subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
+
+        .control-group { margin-bottom: 12px; } /* Tightened */
+        label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px; font-weight: 500; }
+        .val-display { color: var(--accent-color); font-weight: bold; }
+
+        /* General Inputs (Still used in Settings) */
+        select, input[type="range"] {
+            width: 100%; background: var(--control-bg); color: var(--text-color);
+            border: 1px solid var(--control-border); padding: 12px; border-radius: 12px;
+            font-size: 1rem; outline: none; backdrop-filter: blur(5px);
+        }
+        select option { background: var(--bg-base); color: var(--text-color); }
+
+        /* Carousel Selectors */
+        .carousel-selector {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--control-bg);
+            border: 1px solid var(--control-border);
+            border-radius: 12px;
+            padding: 6px;
+            backdrop-filter: blur(5px);
+        }
+        .carousel-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--control-border);
+            color: var(--text-color);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .carousel-btn:active {
+            transform: scale(0.9);
+            background: var(--accent-color);
+            color: #000;
+        }
+        .carousel-val {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: 500;
+            user-select: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 10px;
+            color: var(--accent-color);
+        }
+
+        /* Custom Slider */
+        input[type=range] { -webkit-appearance: none; padding: 0; height: 30px; background: transparent; border: none; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
+            background: var(--accent-color); cursor: pointer; margin-top: -8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: var(--control-border); border-radius: 2px; }
+
+        /* Strings Visualizer */
+        .visualizer {
+            display: flex; justify-content: space-evenly; margin: 20px 0; height: 70px;
+            align-items: center; background: var(--control-bg); border: 1px solid var(--control-border);
+            border-radius: 16px; padding: 10px; box-shadow: inset 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .string { width: 4px; height: 100%; background: var(--control-border); border-radius: 2px; transition: all 0.1s ease; }
+        .string.active { background: var(--accent-color); box-shadow: 0 0 15px var(--accent-color); transform: scaleX(2.5); }
+
+        /* Action Button */
+        .play-btn {
+            width: 100%; padding: 15px; font-size: 1.2rem; font-weight: bold; color: #fff;
+            background-color: var(--accent-color); border: none; border-radius: 12px;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: all 0.3s ease;
+        }
+        .play-btn:active { transform: scale(0.97); }
+        .play-btn.playing { background-color: #e74c3c; }
+
+        /* Settings Modal */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 1000;
+            justify-content: center; align-items: center; padding: 1rem;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content {
+            width: 100%; max-width: 400px; padding: 1.5rem; position: relative;
+            max-height: 90vh; overflow-y: auto;
+        }
+        .close-btn {
+            position: absolute; top: 15px; right: 20px; font-size: 1.5rem;
+            background: none; border: none; color: var(--text-color); cursor: pointer;
+        }
+        .modal-title { margin-bottom: 1.5rem; color: var(--accent-color); text-align: center; }
+        
+        /* Credits */
+        .credits {
+            text-align: center; font-size: 0.8rem; color: var(--text-muted);
+            margin-top: 20px; line-height: 1.5; padding-top: 15px;
+            border-top: 1px solid var(--control-border);
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-shape shape1"></div>
+<div class="bg-shape shape2"></div>
+
+<div class="app-container">
+    <div class="header-row">
+        <h1>Pocket Tanpura</h1>
+        <div class="header-icons">
+            <button id="themeToggle" class="icon-btn">☀️</button>
+            <button id="settingsToggle" class="icon-btn">⚙️</button>
+        </div>
+    </div>
+    <p class="subtitle">Synthesized Harmonic Drone</p>
+
+    <div class="control-group">
+        <label>Base Pitch (Sa)</label>
+        <div class="carousel-selector" id="pitchCarousel">
+            <button class="carousel-btn prev-btn">&#10094;</button>
+            <div class="carousel-val"></div>
+            <button class="carousel-btn next-btn">&#10095;</button>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label>First String (Mandra)</label>
+        <div class="carousel-selector" id="fsCarousel">
+            <button class="carousel-btn prev-btn">&#10094;</button>
+            <div class="carousel-val"></div>
+            <button class="carousel-btn next-btn">&#10095;</button>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label>Middle Strings (Jod)</label>
+        <div class="carousel-selector" id="msCarousel">
+            <button class="carousel-btn prev-btn">&#10094;</button>
+            <div class="carousel-val"></div>
+            <button class="carousel-btn next-btn">&#10095;</button>
+        </div>
+    </div>
+
+    <div class="visualizer">
+        <div class="string" id="str0"></div>
+        <div class="string" id="str1"></div>
+        <div class="string" id="str2"></div>
+        <div class="string" id="str3"></div>
+    </div>
+
+    <button id="playBtn" class="play-btn">Play</button>
+</div>
+
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal-content">
+        <button class="close-btn" id="closeSettings">&times;</button>
+        <h2 class="modal-title">Settings</h2>
+
+        <div class="control-group">
+            <label for="octaveSelect">Tanpura Octave</label>
+            <select id="octaveSelect">
+                <option value="1">Low / Deep (x1)</option>
+                <option value="2" selected>Standard Male (x2)</option>
+                <option value="4">Standard Female (x4)</option>
+                <option value="8">High / Soprano (x8)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="pluckStyle">Plucking Style</label>
+            <select id="pluckStyle">
+                <option value="standard" selected>Standard (Authentic Pause)</option>
+                <option value="even">Continuous (Even Beats)</option>
+                <option value="fast">Fast & Urgent</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="toneSelect">Tone Quality</label>
+            <select id="toneSelect">
+                <option value="rich" selected>Rich (Buzzy Jawari)</option>
+                <option value="mellow">Mellow (Soft)</option>
+                <option value="deep">Deep (Subtle Overtone)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="masterTune">Master Tune <span class="val-display" id="tuneDisplay">440 Hz</span></label>
+            <input type="range" id="masterTune" min="432" max="448" value="440" step="1">
+        </div>
+
+        <div class="control-group">
+            <label for="speedSlider">Pluck Speed</label>
+            <input type="range" id="speedSlider" min="2000" max="7000" value="4500" dir="rtl">
+        </div>
+
+        <div class="control-group">
+            <label for="volSlider">Master Volume</label>
+            <input type="range" id="volSlider" min="0" max="1" step="0.05" value="0.7">
+        </div>
+
+        <div class="credits">
+            Designed by Bhaskarjyoti Das<br>
+            Made in India 🇮🇳
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Carousel Data & Logic ---
+    const carouselData = {
+        pitch: {
+            id: 'pitchCarousel',
+            opts: [
+                {v: "27.50", l: "A0 (Safed 6 / 6 Kattai)"}, {v: "29.14", l: "A#0 (Kali 5 / 6.5 Kattai)"},
+                {v: "30.87", l: "B0 (Safed 7 / 7 Kattai)"}, {v: "32.70", l: "C1 (Safed 1 / 1 Kattai)"},
+                {v: "34.65", l: "C#1 (Kali 1 / 1.5 Kattai)"}, {v: "36.71", l: "D1 (Safed 2 / 2 Kattai)"},
+                {v: "38.89", l: "D#1 (Kali 2 / 2.5 Kattai)"}, {v: "41.20", l: "E1 (Safed 3 / 3 Kattai)"},
+                {v: "43.65", l: "F1 (Safed 4 / 4 Kattai)"}, {v: "46.25", l: "F#1 (Kali 3 / 4.5 Kattai)"},
+                {v: "49.00", l: "G1 (Safed 5 / 5 Kattai)"}, {v: "51.91", l: "G#1 (Kali 4 / 5.5 Kattai)"},
+                {v: "55.00", l: "A1 (Safed 6 / 6 Kattai)"}, {v: "58.27", l: "A#1 (Kali 5 / 6.5 Kattai)"},
+                {v: "61.74", l: "B1 (Safed 7 / 7 Kattai)"}, {v: "65.41", l: "C2 (Safed 1 / 1 Kattai)"}
+            ],
+            idx: 15
+        },
+        firstStr: {
+            id: 'fsCarousel',
+            opts: [
+                {v: "Pa_lower", l: "Pa (Perfect 5th)"},
+                {v: "Ma_lower", l: "Ma (Perfect 4th)"},
+                {v: "Ni_lower", l: "Ni (Major 7th)"}
+            ],
+            idx: 0
+        },
+        midStr: {
+            id: 'msCarousel',
+            opts: [
+                {v: "Sa", l: "Sa (Root)"}, {v: "Re_komal", l: "Komal Re (Minor 2nd)"},
+                {v: "Re", l: "Shuddh Re (Major 2nd)"}, {v: "Ga_komal", l: "Komal Ga (Minor 3rd)"},
+                {v: "Ga", l: "Shuddh Ga (Major 3rd)"}, {v: "Ma", l: "Shuddh Ma (Perfect 4th)"},
+                {v: "Ni", l: "Shuddh Ni (Major 7th)"}
+            ],
+            idx: 0
+        }
+    };
+
+    function initCarousels() {
+        Object.values(carouselData).forEach(c => {
+            const el = document.getElementById(c.id);
+            const valEl = el.querySelector('.carousel-val');
+            
+            const updateUI = () => {
+                valEl.innerText = c.opts[c.idx].l;
+                el.dataset.value = c.opts[c.idx].v;
+            };
+            
+            el.querySelector('.prev-btn').addEventListener('click', () => {
+                c.idx = (c.idx - 1 + c.opts.length) % c.opts.length;
+                updateUI();
+            });
+            
+            el.querySelector('.next-btn').addEventListener('click', () => {
+                c.idx = (c.idx + 1) % c.opts.length;
+                updateUI();
+            });
+            
+            updateUI(); // Set initial value
+        });
+    }
+    
+    initCarousels();
+
+    // --- UI & Theme Logic ---
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    const savedTheme = localStorage.getItem('tanpura-theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme === 'light' || (!savedTheme && !systemPrefersDark)) {
+        body.setAttribute('data-theme', 'light');
+        themeToggle.innerText = '🌙';
+    }
+
+    themeToggle.addEventListener('click', () => {
+        if (body.getAttribute('data-theme') === 'light') {
+            body.removeAttribute('data-theme');
+            localStorage.setItem('tanpura-theme', 'dark');
+            themeToggle.innerText = '☀️';
+        } else {
+            body.setAttribute('data-theme', 'light');
+            localStorage.setItem('tanpura-theme', 'light');
+            themeToggle.innerText = '🌙';
+        }
+    });
+
+    // --- Modal Logic ---
+    const modal = document.getElementById('settingsModal');
+    document.getElementById('settingsToggle').addEventListener('click', () => {
+        modal.classList.add('active');
+    });
+    document.getElementById('closeSettings').addEventListener('click', () => {
+        modal.classList.remove('active');
+    });
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+    });
+
+    // Update Master Tune Label
+    const masterTuneSlider = document.getElementById('masterTune');
+    const tuneDisplay = document.getElementById('tuneDisplay');
+    masterTuneSlider.addEventListener('input', (e) => {
+        tuneDisplay.innerText = `${e.target.value} Hz`;
+    });
+
+    // --- Audio Synthesis Engine ---
+    let audioCtx, masterGain, isPlaying = false, timerID, currentString = 0;
+    
+    // Just Intonation Ratios
+    const ratios = { 
+        'Pa_lower': 0.75, 'Ma_lower': 0.6666, 'Ni_lower': 0.9375, 
+        'Sa': 1.0, 'Re_komal': 1.0666, 'Re': 1.125, 'Ga_komal': 1.2, 
+        'Ga': 1.25, 'Ma': 1.3333, 'Ni': 1.875 
+    };
+
+    const pans = [-0.6, 0.4, -0.4, 0.6];
+
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            masterGain = audioCtx.createGain();
+            masterGain.connect(audioCtx.destination);
+            masterGain.gain.value = document.getElementById('volSlider').value;
+
+            // --- AUTHENTIC TANPURA OVERTONE SERIES (ADDITIVE SYNTHESIS) ---
+            const n = 64; // High harmonic resolution
+            const real = new Float32Array(n);
+            const imag = new Float32Array(n);
+            for (let i = 1; i < n; i++) {
+                let amp = 1 / Math.pow(i, 1.4); // Natural string energy decay
+                // Physical modeling: Formant peaks simulating gourd & bridge (Jawari)
+                if (i === 2 || i === 3) amp *= 1.2; 
+                if (i >= 5 && i <= 8) amp *= 1.5; // Mid-range thread buzz
+                if (i >= 12 && i <= 20) amp *= 1.3; // High-end shimmer
+                real[i] = amp;
+            }
+            // Cache the acoustic profile
+            window.tanpuraWave = audioCtx.createPeriodicWave(real, imag);
+        }
+    }
+
+    document.getElementById('volSlider').addEventListener('input', (e) => {
+        if (masterGain) masterGain.gain.value = e.target.value;
+    });
+
+    function playString(freq, panValue) {
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const toneType = document.getElementById('toneSelect').value;
+
+        // Core Oscillators using custom Acoustic Harmonic Profile
+        const oscMain = audioCtx.createOscillator();
+        const oscDetune = audioCtx.createOscillator();
+        oscMain.setPeriodicWave(window.tanpuraWave);
+        oscDetune.setPeriodicWave(window.tanpuraWave);
+        
+        oscMain.frequency.value = freq;
+        // The slight detune creates the rolling/beating effect of a thick string
+        oscDetune.frequency.value = freq * 1.002; 
+
+        const mainGain = audioCtx.createGain(); 
+        const detuneGain = audioCtx.createGain();
+        const bodyFilter = audioCtx.createBiquadFilter(); // Simulates gourd cavity
+        const jawariFilter = audioCtx.createBiquadFilter(); // Simulates buzzing thread
+        const panner = audioCtx.createStereoPanner ? audioCtx.createStereoPanner() : audioCtx.createPanner();
+        const envGain = audioCtx.createGain();
+
+        // Authentic Tone Configurations
+        let jawariPeakMax, jawariEndFreq, decayTime;
+
+        if (toneType === 'rich') {
+            mainGain.gain.value = 0.55; detuneGain.gain.value = 0.45;
+            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 4; bodyFilter.Q.value = 1.8; bodyFilter.gain.value = 6;
+            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 1.5;
+            jawariPeakMax = freq * 18; jawariEndFreq = freq * 1.5; decayTime = 13.0;
+        } else if (toneType === 'mellow') {
+            mainGain.gain.value = 0.7; detuneGain.gain.value = 0.3;
+            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 2.5; bodyFilter.Q.value = 1.2; bodyFilter.gain.value = 4;
+            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 0.8;
+            jawariPeakMax = freq * 8; jawariEndFreq = freq * 1.2; decayTime = 11.0;
+        } else { // deep
+            mainGain.gain.value = 0.85; detuneGain.gain.value = 0.15;
+            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 1.5; bodyFilter.Q.value = 0.8; bodyFilter.gain.value = 2;
+            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 0.4;
+            jawariPeakMax = freq * 4; jawariEndFreq = freq * 1.0; decayTime = 9.0;
+        }
+
+        // Routing Node Graph
+        oscMain.connect(mainGain); oscDetune.connect(detuneGain);
+        mainGain.connect(bodyFilter); detuneGain.connect(bodyFilter);
+        bodyFilter.connect(jawariFilter);
+        jawariFilter.connect(panner);
+        panner.connect(envGain);
+        envGain.connect(masterGain);
+        
+        // Panning fallback for older iOS
+        if(panner.pan) panner.pan.value = panValue; 
+        else { panner.setPosition(panValue, 0, 1 - Math.abs(panValue)); }
+
+        // Dynamic Jawari Sweep (The "Wah" blossom as string hits the bridge)
+        jawariFilter.frequency.setValueAtTime(freq * 2, now);
+        jawariFilter.frequency.linearRampToValueAtTime(jawariPeakMax, now + 0.6); // Bloom
+        jawariFilter.frequency.exponentialRampToValueAtTime(jawariEndFreq, now + decayTime); // Fade
+
+        // Natural Plucked String Envelope
+        envGain.gain.setValueAtTime(0, now);
+        envGain.gain.linearRampToValueAtTime(1, now + 0.08); // Sharp Pluck
+        envGain.gain.exponentialRampToValueAtTime(0.35, now + 0.8); // Settle into drone
+        envGain.gain.exponentialRampToValueAtTime(0.0001, now + decayTime); // Long fading tail
+
+        oscMain.start(now); oscDetune.start(now);
+        oscMain.stop(now + decayTime); oscDetune.stop(now + decayTime);
+    }
+
+    function scheduleNext() {
+        if (!isPlaying) return;
+        
+        // Calculate Base Frequency using Dataset Values from Carousels
+        const rawBaseFreq = parseFloat(document.getElementById('pitchCarousel').dataset.value);
+        const octaveMult = parseFloat(document.getElementById('octaveSelect').value);
+        const tuneRatio = parseFloat(document.getElementById('masterTune').value) / 440;
+        
+        const saFreq = rawBaseFreq * octaveMult * tuneRatio;
+        
+        const firstStringMode = document.getElementById('fsCarousel').dataset.value;
+        const middleStringMode = document.getElementById('msCarousel').dataset.value;
+        const midFreq = saFreq * ratios[middleStringMode];
+
+        // String Frequencies
+        const stringFreqs = [ 
+            saFreq * ratios[firstStringMode], // String 1
+            midFreq,                          // String 2 (Jod)
+            midFreq,                          // String 3 (Jod)
+            saFreq * 0.5                      // String 4 (Kharaj)
+        ];
+
+        playString(stringFreqs[currentString], pans[currentString]);
+
+        // UI Animation
+        const stringsUI = document.querySelectorAll('.string');
+        stringsUI.forEach(s => s.classList.remove('active'));
+        stringsUI[currentString].classList.add('active');
+        
+        setTimeout(() => { if (stringsUI[currentString]) stringsUI[currentString].classList.remove('active'); }, 400);
+
+        // Plucking Style Delay Calculation
+        const cycleDuration = parseInt(document.getElementById('speedSlider').value);
+        const style = document.getElementById('pluckStyle').value;
+        let rhythmDelays;
+
+        if (style === 'even') rhythmDelays = [1, 1, 1, 1];
+        else if (style === 'fast') rhythmDelays = [0.8, 0.8, 0.8, 1.2];
+        else rhythmDelays = [1, 1, 1, 2]; // Standard
+
+        const delay = rhythmDelays[currentString] * (cycleDuration / 5);
+
+        currentString = (currentString + 1) % 4;
+        timerID = setTimeout(scheduleNext, delay);
+    }
+
+    document.getElementById('playBtn').addEventListener('click', async () => {
+        initAudio();
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
+        const btn = document.getElementById('playBtn');
+
+        if (isPlaying) {
+            isPlaying = false;
+            clearTimeout(timerID);
+            btn.innerText = 'Play';
+            btn.classList.remove('playing');
+        } else {
+            isPlaying = true;
+            currentString = 0;
+            btn.innerText = 'Stop';
+            btn.classList.add('playing');
+            scheduleNext();
+        }
+    });
+
+    // PWA Setup
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+        });
+    }
+</script>
+
+</body>
+</html>
