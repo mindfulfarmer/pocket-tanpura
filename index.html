@@ -56,6 +56,8 @@
             justify-content: center;
             align-items: center;
             height: 100vh; /* Strictly 100vh */
+            min-height: 550px; /* Minimum screen size */
+            min-width: 320px; /* Minimum screen size */
             overflow: hidden; /* NO SCROLLING */
             padding: 1rem;
             position: relative;
@@ -92,6 +94,7 @@
         .app-container {
             width: 100%;
             max-width: 400px;
+            min-width: 300px; /* Minimum screen size constraint */
             padding: 1.5rem; /* Tightened for comfort without scrolling */
             z-index: 1;
         }
@@ -129,56 +132,15 @@
         label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px; font-weight: 500; }
         .val-display { color: var(--accent-color); font-weight: bold; }
 
-        /* General Inputs (Still used in Settings) */
+        /* General Inputs & Dropdowns */
         select, input[type="range"] {
             width: 100%; background: var(--control-bg); color: var(--text-color);
             border: 1px solid var(--control-border); padding: 12px; border-radius: 12px;
             font-size: 1rem; outline: none; backdrop-filter: blur(5px);
+            appearance: none; -webkit-appearance: none;
         }
-        select option { background: var(--bg-base); color: var(--text-color); }
-
-        /* Carousel Selectors */
-        .carousel-selector {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--control-bg);
-            border: 1px solid var(--control-border);
-            border-radius: 12px;
-            padding: 6px;
-            backdrop-filter: blur(5px);
-        }
-        .carousel-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--control-border);
-            color: var(--text-color);
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.2s;
-        }
-        .carousel-btn:active {
-            transform: scale(0.9);
-            background: var(--accent-color);
-            color: #000;
-        }
-        .carousel-val {
-            flex-grow: 1;
-            text-align: center;
-            font-size: 0.95rem;
-            font-weight: 500;
-            user-select: none;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            padding: 0 10px;
-            color: var(--accent-color);
-        }
+        select { text-align: center; font-weight: 500; cursor: pointer; color: var(--accent-color); }
+        select option { background: var(--bg-base); color: var(--text-color); text-align: center; }
 
         /* Custom Slider */
         input[type=range] { -webkit-appearance: none; padding: 0; height: 30px; background: transparent; border: none; }
@@ -189,14 +151,24 @@
         }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: var(--control-border); border-radius: 2px; }
 
-        /* Strings Visualizer */
+        /* Strings Visualizer & Pluck Animation */
         .visualizer {
             display: flex; justify-content: space-evenly; margin: 20px 0; height: 70px;
             align-items: center; background: var(--control-bg); border: 1px solid var(--control-border);
             border-radius: 16px; padding: 10px; box-shadow: inset 0 4px 10px rgba(0,0,0,0.1);
         }
-        .string { width: 4px; height: 100%; background: var(--control-border); border-radius: 2px; transition: all 0.1s ease; }
-        .string.active { background: var(--accent-color); box-shadow: 0 0 15px var(--accent-color); transform: scaleX(2.5); }
+        .string { width: 4px; height: 100%; background: var(--control-border); border-radius: 2px; }
+        
+        @keyframes pluckVibrate {
+            0% { transform: scaleX(1); background: var(--control-border); }
+            10% { transform: scaleX(3) translateX(2px); background: var(--accent-color); box-shadow: 0 0 15px var(--accent-color); }
+            20% { transform: scaleX(2.5) translateX(-2px); }
+            30% { transform: scaleX(3) translateX(1px); }
+            40% { transform: scaleX(2) translateX(-1px); }
+            60% { transform: scaleX(2.5) translateX(0); background: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); }
+            100% { transform: scaleX(1); background: var(--control-border); box-shadow: none; }
+        }
+        .string.active { animation: pluckVibrate 0.8s ease-out forwards; }
 
         /* Action Button */
         .play-btn {
@@ -249,30 +221,57 @@
     <p class="subtitle">Synthesized Harmonic Drone</p>
 
     <div class="control-group">
-        <label>Base Pitch (Sa)</label>
-        <div class="carousel-selector" id="pitchCarousel">
-            <button class="carousel-btn prev-btn">&#10094;</button>
-            <div class="carousel-val"></div>
-            <button class="carousel-btn next-btn">&#10095;</button>
-        </div>
+        <label for="pitchSelect">Base Pitch (Sa)</label>
+        <select id="pitchSelect">
+            <option value="27.50">A0 (Safed 6 / 6 Kattai)</option>
+            <option value="29.14">A#0 (Kali 5 / 6.5 Kattai)</option>
+            <option value="30.87">B0 (Safed 7 / 7 Kattai)</option>
+            <option value="32.70" selected>C1 (Safed 1 / 1 Kattai)</option>
+            <option value="34.65">C#1 (Kali 1 / 1.5 Kattai)</option>
+            <option value="36.71">D1 (Safed 2 / 2 Kattai)</option>
+            <option value="38.89">D#1 (Kali 2 / 2.5 Kattai)</option>
+            <option value="41.20">E1 (Safed 3 / 3 Kattai)</option>
+            <option value="43.65">F1 (Safed 4 / 4 Kattai)</option>
+            <option value="46.25">F#1 (Kali 3 / 4.5 Kattai)</option>
+            <option value="49.00">G1 (Safed 5 / 5 Kattai)</option>
+            <option value="51.91">G#1 (Kali 4 / 5.5 Kattai)</option>
+            <option value="55.00">A1 (Safed 6 / 6 Kattai)</option>
+            <option value="58.27">A#1 (Kali 5 / 6.5 Kattai)</option>
+            <option value="61.74">B1 (Safed 7 / 7 Kattai)</option>
+            <option value="65.41">C2 (Safed 1 / 1 Kattai)</option>
+        </select>
     </div>
 
     <div class="control-group">
-        <label>First String (Mandra)</label>
-        <div class="carousel-selector" id="fsCarousel">
-            <button class="carousel-btn prev-btn">&#10094;</button>
-            <div class="carousel-val"></div>
-            <button class="carousel-btn next-btn">&#10095;</button>
-        </div>
+        <label for="fsSelect">First String (Mandra)</label>
+        <select id="fsSelect">
+            <option value="Pa_lower" selected>Pa (Perfect 5th)</option>
+            <option value="Ma_lower">Ma (Perfect 4th)</option>
+            <option value="Ni_lower">Ni (Major 7th)</option>
+        </select>
     </div>
 
     <div class="control-group">
-        <label>Middle Strings (Jod)</label>
-        <div class="carousel-selector" id="msCarousel">
-            <button class="carousel-btn prev-btn">&#10094;</button>
-            <div class="carousel-val"></div>
-            <button class="carousel-btn next-btn">&#10095;</button>
-        </div>
+        <label for="msSelect">Middle Strings (Jod)</label>
+        <select id="msSelect">
+            <option value="Sa" selected>Sa (Root)</option>
+            <option value="Re_komal">Komal Re (Minor 2nd)</option>
+            <option value="Re">Shuddh Re (Major 2nd)</option>
+            <option value="Ga_komal">Komal Ga (Minor 3rd)</option>
+            <option value="Ga">Shuddh Ga (Major 3rd)</option>
+            <option value="Ma">Shuddh Ma (Perfect 4th)</option>
+            <option value="Ni">Shuddh Ni (Major 7th)</option>
+        </select>
+    </div>
+
+    <div class="control-group">
+        <label for="octaveSelect">Tanpura Octave</label>
+        <select id="octaveSelect">
+            <option value="1">Low / Deep (x1)</option>
+            <option value="2">Standard Male (x2)</option>
+            <option value="4" selected>Standard Female (x4)</option>
+            <option value="8">High / Soprano (x8)</option>
+        </select>
     </div>
 
     <div class="visualizer">
@@ -289,16 +288,6 @@
     <div class="modal-content">
         <button class="close-btn" id="closeSettings">&times;</button>
         <h2 class="modal-title">Settings</h2>
-
-        <div class="control-group">
-            <label for="octaveSelect">Tanpura Octave</label>
-            <select id="octaveSelect">
-                <option value="1">Low / Deep (x1)</option>
-                <option value="2" selected>Standard Male (x2)</option>
-                <option value="4">Standard Female (x4)</option>
-                <option value="8">High / Soprano (x8)</option>
-            </select>
-        </div>
 
         <div class="control-group">
             <label for="pluckStyle">Plucking Style</label>
@@ -341,68 +330,40 @@
 </div>
 
 <script>
-    // --- Carousel Data & Logic ---
-    const carouselData = {
-        pitch: {
-            id: 'pitchCarousel',
-            opts: [
-                {v: "27.50", l: "A0 (Safed 6 / 6 Kattai)"}, {v: "29.14", l: "A#0 (Kali 5 / 6.5 Kattai)"},
-                {v: "30.87", l: "B0 (Safed 7 / 7 Kattai)"}, {v: "32.70", l: "C1 (Safed 1 / 1 Kattai)"},
-                {v: "34.65", l: "C#1 (Kali 1 / 1.5 Kattai)"}, {v: "36.71", l: "D1 (Safed 2 / 2 Kattai)"},
-                {v: "38.89", l: "D#1 (Kali 2 / 2.5 Kattai)"}, {v: "41.20", l: "E1 (Safed 3 / 3 Kattai)"},
-                {v: "43.65", l: "F1 (Safed 4 / 4 Kattai)"}, {v: "46.25", l: "F#1 (Kali 3 / 4.5 Kattai)"},
-                {v: "49.00", l: "G1 (Safed 5 / 5 Kattai)"}, {v: "51.91", l: "G#1 (Kali 4 / 5.5 Kattai)"},
-                {v: "55.00", l: "A1 (Safed 6 / 6 Kattai)"}, {v: "58.27", l: "A#1 (Kali 5 / 6.5 Kattai)"},
-                {v: "61.74", l: "B1 (Safed 7 / 7 Kattai)"}, {v: "65.41", l: "C2 (Safed 1 / 1 Kattai)"}
-            ],
-            idx: 15
-        },
-        firstStr: {
-            id: 'fsCarousel',
-            opts: [
-                {v: "Pa_lower", l: "Pa (Perfect 5th)"},
-                {v: "Ma_lower", l: "Ma (Perfect 4th)"},
-                {v: "Ni_lower", l: "Ni (Major 7th)"}
-            ],
-            idx: 0
-        },
-        midStr: {
-            id: 'msCarousel',
-            opts: [
-                {v: "Sa", l: "Sa (Root)"}, {v: "Re_komal", l: "Komal Re (Minor 2nd)"},
-                {v: "Re", l: "Shuddh Re (Major 2nd)"}, {v: "Ga_komal", l: "Komal Ga (Minor 3rd)"},
-                {v: "Ga", l: "Shuddh Ga (Major 3rd)"}, {v: "Ma", l: "Shuddh Ma (Perfect 4th)"},
-                {v: "Ni", l: "Shuddh Ni (Major 7th)"}
-            ],
-            idx: 0
-        }
-    };
+    // --- Local Storage Auto-Save Settings ---
+    const settingsControls = ['pitchSelect', 'fsSelect', 'msSelect', 'octaveSelect', 'pluckStyle', 'toneSelect', 'masterTune', 'speedSlider', 'volSlider'];
 
-    function initCarousels() {
-        Object.values(carouselData).forEach(c => {
-            const el = document.getElementById(c.id);
-            const valEl = el.querySelector('.carousel-val');
-            
-            const updateUI = () => {
-                valEl.innerText = c.opts[c.idx].l;
-                el.dataset.value = c.opts[c.idx].v;
-            };
-            
-            el.querySelector('.prev-btn').addEventListener('click', () => {
-                c.idx = (c.idx - 1 + c.opts.length) % c.opts.length;
-                updateUI();
-            });
-            
-            el.querySelector('.next-btn').addEventListener('click', () => {
-                c.idx = (c.idx + 1) % c.opts.length;
-                updateUI();
-            });
-            
-            updateUI(); // Set initial value
+    function saveSettings() {
+        settingsControls.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) localStorage.setItem('tanpura_' + id, el.value);
         });
     }
-    
-    initCarousels();
+
+    function loadSettings() {
+        settingsControls.forEach(id => {
+            const val = localStorage.getItem('tanpura_' + id);
+            const el = document.getElementById(id);
+            if (val !== null && el) {
+                el.value = val;
+                // Update display label for Master Tune on load
+                if (id === 'masterTune') {
+                    document.getElementById('tuneDisplay').innerText = `${val} Hz`;
+                }
+            }
+        });
+    }
+
+    // Attach listeners to trigger save on change
+    settingsControls.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', saveSettings);
+            if (el.type === 'range') el.addEventListener('input', saveSettings);
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', loadSettings);
 
     // --- UI & Theme Logic ---
     const themeToggle = document.getElementById('themeToggle');
@@ -439,7 +400,7 @@
         if (e.target === modal) modal.classList.remove('active');
     });
 
-    // Update Master Tune Label
+    // Update Master Tune Label on Drag
     const masterTuneSlider = document.getElementById('masterTune');
     const tuneDisplay = document.getElementById('tuneDisplay');
     masterTuneSlider.addEventListener('input', (e) => {
@@ -558,15 +519,15 @@
     function scheduleNext() {
         if (!isPlaying) return;
         
-        // Calculate Base Frequency using Dataset Values from Carousels
-        const rawBaseFreq = parseFloat(document.getElementById('pitchCarousel').dataset.value);
+        // Calculate Base Frequency using Values from Dropdowns
+        const rawBaseFreq = parseFloat(document.getElementById('pitchSelect').value);
         const octaveMult = parseFloat(document.getElementById('octaveSelect').value);
         const tuneRatio = parseFloat(document.getElementById('masterTune').value) / 440;
         
         const saFreq = rawBaseFreq * octaveMult * tuneRatio;
         
-        const firstStringMode = document.getElementById('fsCarousel').dataset.value;
-        const middleStringMode = document.getElementById('msCarousel').dataset.value;
+        const firstStringMode = document.getElementById('fsSelect').value;
+        const middleStringMode = document.getElementById('msSelect').value;
         const midFreq = saFreq * ratios[middleStringMode];
 
         // String Frequencies
@@ -579,12 +540,11 @@
 
         playString(stringFreqs[currentString], pans[currentString]);
 
-        // UI Animation
+        // Trigger Pluck UI Animation (Force Reflow to restart animation)
         const stringsUI = document.querySelectorAll('.string');
         stringsUI.forEach(s => s.classList.remove('active'));
+        void stringsUI[currentString].offsetWidth; 
         stringsUI[currentString].classList.add('active');
-        
-        setTimeout(() => { if (stringsUI[currentString]) stringsUI[currentString].classList.remove('active'); }, 400);
 
         // Plucking Style Delay Calculation
         const cycleDuration = parseInt(document.getElementById('speedSlider').value);
