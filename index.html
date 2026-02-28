@@ -6,7 +6,7 @@
     <title>Pocket Tanpura</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#121212">
+    <meta name="theme-color" content="#1a1105">
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,32 +14,50 @@
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <style>
-        /* Dark Mode (Base) */
+        /* Dark Mode (Base) - Aligned to Golden/Brown Logo */
         :root {
-            --bg-base: #0f172a;
-            --shape-1: #3b82f6; 
-            --shape-2: #8b5cf6; 
-            --glass-bg: rgba(30, 30, 40, 0.45);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-color: #f8fafc;
-            --text-muted: #cbd5e1;
+            --bg-base: #1a1105; 
+            --shape-1: #c59b27; 
+            --shape-2: #8c5a19; 
+            --glass-bg: transparent; 
+            --glass-border: transparent; 
+            --text-color: #fdf5e6;
+            --text-muted: #d4b895;
             --accent-color: #d4af37; 
-            --control-bg: rgba(0, 0, 0, 0.3);
-            --control-border: rgba(255, 255, 255, 0.15);
+            --control-bg: rgba(0, 0, 0, 0.4);
+            --control-border: rgba(212, 175, 55, 0.2);
+            
+            /* Engraved variables */
+            --engrave-shadow: rgba(0, 0, 0, 0.95);
+            --engrave-highlight: rgba(255, 255, 255, 0.12);
+            
+            /* 3D Button Depth */
+            --btn-depth-color: #8b6914; 
+            --btn-playing-depth: #641e16;
+
+            --audio-intensity: 0; 
         }
 
-        /* Light Mode */
+        /* Light Mode - Aligned to Golden/Brown Logo */
         [data-theme="light"] {
-            --bg-base: #f1f5f9;
-            --shape-1: #ff9a9e; 
-            --shape-2: #a18cd1; 
-            --glass-bg: rgba(255, 255, 255, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --text-color: #1e293b;
-            --text-muted: #475569;
-            --accent-color: #d35400; 
+            --bg-base: #fdf8f0; 
+            --shape-1: #e8c37d; 
+            --shape-2: #d4a373; 
+            --glass-bg: transparent; 
+            --glass-border: transparent; 
+            --text-color: #3b2818;
+            --text-muted: #735942;
+            --accent-color: #b8860b; 
             --control-bg: rgba(255, 255, 255, 0.5);
-            --control-border: rgba(0, 0, 0, 0.1);
+            --control-border: rgba(184, 134, 11, 0.2);
+            
+            /* Engraved variables */
+            --engrave-shadow: rgba(0, 0, 0, 0.2);
+            --engrave-highlight: rgba(255, 255, 255, 0.9);
+
+            /* 3D Button Depth */
+            --btn-depth-color: #8b6508;
+            --btn-playing-depth: #7b241c;
         }
 
         * {
@@ -47,7 +65,6 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            /* Prevent pull-to-refresh and selection on mobile */
             overscroll-behavior-y: none;
             user-select: none;
             -webkit-user-select: none;
@@ -59,7 +76,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Use dvh for dynamic viewport height */
             height: 100dvh; 
             width: 100vw;
             overflow: hidden; 
@@ -68,37 +84,68 @@
             transition: background-color 0.4s ease;
         }
 
-        /* Animated Background Blobs */
+        /* --- BACKGROUND LAYER --- */
+        .bg-anim-layer {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -2; overflow: hidden;
+        }
+
+        .drift-container { position: absolute; width: 100%; height: 100%; }
+        
+        .mover1 { animation: drift1 20s infinite alternate ease-in-out; }
+        .mover2 { animation: drift2 25s infinite alternate-reverse ease-in-out; }
+        .mover3 { animation: drift3 15s infinite alternate ease-in-out; }
+
+        @keyframes drift1 { 0% { transform: translate(-5vw, -5vh) rotate(0deg); } 100% { transform: translate(25vw, 15vh) rotate(45deg); } }
+        @keyframes drift2 { 0% { transform: translate(5vw, 5vh) rotate(0deg); } 100% { transform: translate(-20vw, -15vh) rotate(-30deg); } }
+        @keyframes drift3 { 0% { transform: translate(0vw, 10vh); } 100% { transform: translate(-15vw, -20vh); } }
+
         .bg-shape {
             position: absolute;
-            filter: blur(80px);
-            z-index: -1;
             border-radius: 50%;
-            animation: float 10s infinite alternate ease-in-out;
-            opacity: 0.8;
+            transform: scale(calc(1 + var(--audio-intensity) * 0.8));
+            transition: transform 0.08s ease-out, opacity 0.08s ease-out;
         }
-        .shape1 { width: 350px; height: 350px; background: var(--shape-1); top: -100px; left: -100px; }
-        .shape2 { width: 400px; height: 400px; background: var(--shape-2); bottom: -150px; right: -100px; animation-delay: -5s; }
 
-        @keyframes float {
-            0% { transform: translateY(0) scale(1); }
-            100% { transform: translateY(30px) scale(1.1); }
+        .shape1 { 
+            width: 65vw; height: 65vw; min-width: 450px; min-height: 450px;
+            background: var(--shape-1); filter: blur(90px);
+            top: -15%; left: -15%; 
+            opacity: calc(0.35 + (var(--audio-intensity) * 0.5));
+        }
+        
+        .shape2 { 
+            width: 75vw; height: 75vw; min-width: 500px; min-height: 500px;
+            background: var(--shape-2); filter: blur(100px);
+            bottom: -20%; right: -15%; 
+            opacity: calc(0.25 + (var(--audio-intensity) * 0.6));
+        }
+        
+        .shape3 { 
+            width: 50vw; height: 50vw; min-width: 350px; min-height: 350px;
+            background: var(--accent-color); filter: blur(120px);
+            top: 25%; left: 25%;
+            opacity: calc(0.05 + (var(--audio-intensity) * 0.8));
+            transform: scale(calc(0.8 + var(--audio-intensity) * 1.5));
+        }
+
+        .bg-vignette {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.9) 150%);
+            z-index: -1; pointer-events: none; transition: background 0.4s ease;
+        }
+        [data-theme="light"] .bg-vignette {
+            background: radial-gradient(circle at center, transparent 20%, rgba(255,255,255,0.75) 150%);
         }
 
         /* App Container */
         .app-container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            border-radius: 20px;
             width: 100%;
             max-width: 420px;
-            max-height: 96dvh;
+            height: 96dvh; 
             display: flex;
             flex-direction: column;
-            padding: 1rem;
+            padding: 2vh 1.25rem; 
             z-index: 1;
         }
 
@@ -106,79 +153,126 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px; /* Slightly reduced */
             flex-shrink: 0;
+            padding-bottom: 1.5vh;
         }
 
-        h1 { font-weight: 600; letter-spacing: 0.5px; color: var(--accent-color); font-size: 1.4rem; cursor: pointer; }
+        /* --- TRUE ENGRAVED STAMP LOGO --- */
+        h1 { 
+            font-weight: 900; 
+            letter-spacing: 1.5px; 
+            font-size: 1.05rem; /* Smaller, stamped look */
+            text-transform: uppercase;
+            cursor: pointer; 
+            /* Color exact match to background to sink it into the material */
+            color: var(--control-border); 
+            /* Dark shadow top-left, Light highlight bottom-right simulates a physical engraving */
+            text-shadow: 
+                -1px -1px 2px var(--engrave-shadow),
+                 1px  1px 1px var(--engrave-highlight);
+            opacity: 0.9; 
+            transition: color 0.4s ease, text-shadow 0.4s ease;
+        }
 
+        /* Top Right Menu Toggle */
         .icon-btn {
-            background: var(--control-bg);
-            border: 1px solid var(--control-border);
-            color: var(--text-color);
+            background: transparent;
+            border: none;
+            color: var(--accent-color);
             border-radius: 50%;
-            width: 36px; height: 36px;
-            font-size: 1.1rem;
+            width: 38px; height: 38px;
+            font-size: 1.6rem;
             cursor: pointer;
             display: flex; justify-content: center; align-items: center;
-            transition: transform 0.2s;
+            transition: transform 0.2s, color 0.2s;
         }
-        .icon-btn:active { transform: scale(0.9); }
+        .icon-btn:active { transform: scale(0.85); }
 
-        /* Controls */
+        /* --- PERFECTLY EVEN FLEX SPACING AREA --- */
         .controls-scroll {
             display: flex;
             flex-direction: column;
             overflow: hidden; 
             flex-grow: 1;
+            /* Mathematically spaces every child element perfectly equally */
+            justify-content: space-evenly; 
+            gap: 1vh; /* Safety gap for tiny screens */
         }
 
-        .control-group { margin-bottom: 6px; flex-shrink: 0; } /* Slightly reduced gap */
-        .control-group.inline-flex { display: flex; align-items: center; gap: 10px; }
+        /* Force strictly zero margins on direct children to allow flexbox to do 100% of the spacing */
+        .controls-scroll > * {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            flex-shrink: 1;
+        }
+
+        .control-group.inline-flex { display: flex; align-items: center; gap: 12px; }
         .control-group.inline-flex > * { flex: 1; }
         
-        label { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 2px; font-weight: 500; }
+        label { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 0.85rem; 
+            margin-bottom: 8px; /* Comfortable padding between label and button */
+            font-weight: 600; 
+            color: var(--text-color);
+        }
         .val-display { color: var(--accent-color); font-weight: bold; font-variant-numeric: tabular-nums; }
 
-        select {
-            width: 100%; background: var(--control-bg); color: var(--text-color);
-            border: 1px solid var(--control-border); padding: 6px; border-radius: 10px;
-            font-size: 0.85rem; outline: none; backdrop-filter: blur(5px);
-            appearance: none; -webkit-appearance: none;
-            text-align: center; font-weight: 500; cursor: pointer; color: var(--accent-color);
+        /* Increased and Uniform Select Heights */
+        select, .settings-theme-btn {
+            width: 100%; 
+            background: var(--control-bg); 
+            color: var(--text-color);
+            border: 1px solid var(--control-border); 
+            height: 54px; /* Explicit and robust uniform height */
+            padding: 0 10px; 
+            border-radius: 12px;
+            font-size: 0.95rem; 
+            outline: none; 
+            backdrop-filter: blur(5px);
+            appearance: none; 
+            -webkit-appearance: none;
+            text-align: center; 
+            font-weight: 600; 
+            cursor: pointer; 
+            color: var(--accent-color);
+            transition: background 0.2s;
         }
         select option { background: var(--bg-base); color: var(--text-color); text-align: center; }
 
-        /* Custom Sliders with Visual Markers */
-        .slider-wrapper { position: relative; margin-bottom: 4px; }
+        /* Sliders */
+        .slider-wrapper { position: relative; margin-bottom: 0.5vh; }
         input[type=range] { 
-            width: 100%; -webkit-appearance: none; padding: 0; height: 24px; 
+            width: 100%; -webkit-appearance: none; padding: 0; height: 26px; 
             background: transparent; border: none; outline: none; z-index: 2; position: relative;
         }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
-            background: var(--accent-color); cursor: pointer; margin-top: -7px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
+            background: var(--accent-color); cursor: pointer; margin-top: -8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: var(--control-border); border-radius: 2px; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 5px; background: var(--control-border); border-radius: 3px; }
         
-        /* Ticks beneath sliders */
         .ticks { 
             display: flex; justify-content: space-between; padding: 0 8px; 
-            margin-top: -10px; pointer-events: none; z-index: 1; position: relative; opacity: 0.6;
+            margin-top: -12px; pointer-events: none; z-index: 1; position: relative; opacity: 0.6;
         }
         .ticks span { width: 2px; height: 6px; background: var(--text-muted); border-radius: 1px; }
 
-        /* Integrated Visualizer & Speed Area */
+        /* --- VISUALIZER --- */
         .visualizer-card {
             background: var(--control-bg); border: 1px solid var(--control-border);
-            border-radius: 14px; padding: 8px 10px; margin: 6px 0;
-            box-shadow: inset 0 4px 10px rgba(0,0,0,0.1);
-            flex-shrink: 0;
+            border-radius: 16px; 
+            padding: 18px 16px; 
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.2);
+            backdrop-filter: blur(5px);
         }
         .visualizer {
-            display: flex; justify-content: space-evenly; height: 35px;
-            align-items: center; margin-bottom: 6px;
+            display: flex; justify-content: space-evenly; 
+            height: 6vh; 
+            min-height: 45px; 
+            align-items: center; margin-bottom: 1.5vh;
         }
         .string { width: 3px; height: 100%; background: var(--control-border); border-radius: 2px; }
         
@@ -193,71 +287,112 @@
         }
         .string.active { animation: pluckVibrate 0.8s ease-out forwards; }
 
-        /* Action Button - Enlarged with precise margins */
+        /* --- 3D RUBBER PLAY BUTTON --- */
         .play-btn {
-            width: 100%; 
-            padding: 18px; /* Enlarged padding */
-            font-size: 1.25rem; /* Enlarged font */
-            letter-spacing: 0.5px;
-            font-weight: bold; 
+            width: 90%; 
+            align-self: center;
+            height: 75px; 
+            min-height: 75px;
+            font-size: 1.4rem; 
+            letter-spacing: 1px;
+            font-weight: 800; 
             color: #fff;
+            
             background-color: var(--accent-color); 
+            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.15"/></svg>');
+            
             border: none; 
             border-radius: 16px;
             cursor: pointer; 
-            box-shadow: 0 6px 20px rgba(0,0,0,0.25); 
-            transition: all 0.3s ease;
-            flex-shrink: 0; 
-            margin-top: 16px; /* Padding above the button */
-            margin-bottom: 4px; /* Padding below the button */
+            
+            box-shadow: 0 8px 0 var(--btn-depth-color);
+            transform: translateY(0);
+            
+            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.1s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s;
+            
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
         }
-        .play-btn:active { transform: scale(0.97); box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .play-btn.playing { background-color: #e74c3c; }
+        
+        .play-btn:active { 
+            transform: translateY(8px); 
+            box-shadow: 0 0px 0 var(--btn-depth-color); 
+        }
+        
+        .play-btn.playing { 
+            background-color: #c0392b; 
+            box-shadow: 0 8px 0 var(--btn-playing-depth);
+        }
+        
+        .play-btn.playing:active { 
+            transform: translateY(8px);
+            box-shadow: 0 0px 0 var(--btn-playing-depth);
+        }
 
-        /* Modal Styles */
+        .btn-icon { font-size: 1.5rem; margin-top: 1px; }
+
+        /* --- UNIFORM HIGH VISIBILITY MODALS --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
-            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             display: flex; justify-content: center; align-items: center;
             z-index: 100; visibility: hidden; opacity: 0;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
         .modal-overlay.show { visibility: visible; opacity: 1; }
         
+        /* Same width constraint for both Modals */
         .modal-content {
-            background: var(--glass-bg); border: 1px solid var(--glass-border);
-            border-radius: 16px; padding: 30px 20px;
-            text-align: center; color: var(--text-color);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            position: relative; min-width: 280px;
+            background: var(--bg-base); 
+            border: 1px solid var(--control-border);
+            border-radius: 16px; 
+            padding: 30px 25px;
+            text-align: left; color: var(--text-color);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            position: relative; 
+            width: 340px; 
+            max-width: 90vw;
+            box-sizing: border-box;
         }
-        .modal-content h2 { color: var(--accent-color); margin-bottom: 5px; font-size: 1.6rem; }
-        .modal-content p { font-size: 0.95rem; color: var(--text-muted); }
-        .modal-content .author { margin-top: 15px; color: var(--text-color); font-weight: 500; }
+        
+        .modal-content.credits-center { text-align: center; }
+        .modal-content h2 { color: var(--accent-color); margin-bottom: 20px; font-size: 1.5rem; }
+        .modal-content p { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 5px; }
+        .modal-content .author { margin-top: 15px; color: var(--text-color); font-weight: 600; }
         
         .close-btn {
             position: absolute; top: 10px; right: 15px;
-            background: none; border: none; font-size: 1.8rem;
+            background: none; border: none; font-size: 2rem;
             color: var(--text-muted); cursor: pointer; transition: color 0.2s;
         }
         .close-btn:hover { color: var(--text-color); }
+
+        .settings-content .control-group { margin-bottom: 20px; }
+        .settings-content label { margin-bottom: 10px; }
 
     </style>
 </head>
 <body>
 
-<div class="bg-shape shape1"></div>
-<div class="bg-shape shape2"></div>
+<div class="bg-anim-layer">
+    <div class="drift-container mover1"><div class="bg-shape shape1"></div></div>
+    <div class="drift-container mover2"><div class="bg-shape shape2"></div></div>
+    <div class="drift-container mover3"><div class="bg-shape shape3"></div></div>
+</div>
+<div class="bg-vignette"></div>
 
 <div class="app-container">
     <div class="header-row">
         <h1 id="appLogo">Pocket Tanpura</h1>
         <div class="header-icons">
-            <button id="themeToggle" class="icon-btn" title="Toggle Theme">🌓</button>
+            <button id="settingsMenuBtn" class="icon-btn" title="Settings">⋮</button>
         </div>
     </div>
 
     <div class="controls-scroll">
+        
         <div class="control-group">
             <label for="pitchSelect">Base Pitch (Sa)</label>
             <select id="pitchSelect">
@@ -284,21 +419,21 @@
             <div>
                 <label for="fsSelect">First String</label>
                 <select id="fsSelect">
-                    <option value="Pa_lower" selected>Pa (5th)</option>
-                    <option value="Ma_lower">Ma (4th)</option>
-                    <option value="Ni_lower">Ni (7th)</option>
+                    <option value="Pa_lower" selected>Mandra Pancham (Pa 5th)</option>
+                    <option value="Ma_lower">Mandra Madhyam (Ma 4th)</option>
+                    <option value="Ni_lower">Mandra Nishad (Ni 7th)</option>
                 </select>
             </div>
             <div>
                 <label for="msSelect">Middle Strings</label>
                 <select id="msSelect">
-                    <option value="Sa" selected>Sa (Root)</option>
-                    <option value="Re_komal">k. Re</option>
-                    <option value="Re">S. Re</option>
-                    <option value="Ga_komal">k. Ga</option>
-                    <option value="Ga">S. Ga</option>
-                    <option value="Ma">S. Ma</option>
-                    <option value="Ni">S. Ni</option>
+                    <option value="Sa" selected>Shuddha Shadja (Sa Root)</option>
+                    <option value="Re_komal">Komal Rishabh (k. Re)</option>
+                    <option value="Re">Shuddha Rishabh (S. Re)</option>
+                    <option value="Ga_komal">Komal Gandhar (k. Ga)</option>
+                    <option value="Ga">Shuddha Gandhar (S. Ga)</option>
+                    <option value="Ma">Shuddha Madhyam (S. Ma)</option>
+                    <option value="Ni">Shuddha Nishad (S. Ni)</option>
                 </select>
             </div>
         </div>
@@ -313,6 +448,25 @@
             </select>
         </div>
 
+        <div class="control-group inline-flex">
+            <div>
+                <label for="pluckStyle">Pluck Style</label>
+                <select id="pluckStyle">
+                    <option value="standard" selected>Authentic Rhythm</option>
+                    <option value="even">Continuous Even</option>
+                    <option value="fast">Urgent Fast</option>
+                </select>
+            </div>
+            <div>
+                <label for="toneSelect">Synthesis Tone</label>
+                <select id="toneSelect">
+                    <option value="rich" selected>Rich Harmonic</option>
+                    <option value="mellow">Mellow Soft</option>
+                    <option value="deep">Deep Acoustic</option>
+                </select>
+            </div>
+        </div>
+
         <div class="visualizer-card">
             <div class="visualizer">
                 <div class="string" id="str0"></div>
@@ -320,7 +474,7 @@
                 <div class="string" id="str2"></div>
                 <div class="string" id="str3"></div>
             </div>
-            <div class="control-group" style="margin-bottom:0;">
+            <div class="control-group">
                 <label for="speedSlider">Pluck Speed <span class="val-display" id="speedDisplay">50 BPM</span></label>
                 <div class="slider-wrapper">
                     <input type="range" id="speedSlider" min="30" max="130" value="50" step="1">
@@ -330,55 +484,48 @@
                 </div>
             </div>
         </div>
+        
+        <button id="playBtn" class="play-btn">
+            <span class="btn-icon">▶</span> <span class="btn-text">Play</span>
+        </button>
+    </div>
+</div>
 
-        <div id="moreOptions">
-            <div class="control-group inline-flex">
-                <div>
-                    <label for="pluckStyle">Style</label>
-                    <select id="pluckStyle">
-                        <option value="standard" selected>Authentic</option>
-                        <option value="even">Continuous</option>
-                        <option value="fast">Urgent</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="toneSelect">Tone</label>
-                    <select id="toneSelect">
-                        <option value="rich" selected>Rich</option>
-                        <option value="mellow">Mellow</option>
-                        <option value="deep">Deep</option>
-                    </select>
-                </div>
-            </div>
+<div id="settingsModal" class="modal-overlay">
+    <div class="modal-content settings-content">
+        <button id="closeSettingsModal" class="close-btn">&times;</button>
+        <h2>Settings</h2>
+        
+        <div class="control-group">
+            <label>App Theme</label>
+            <button id="themeToggle" class="settings-theme-btn">Auto 🌓</button>
+        </div>
 
-            <div class="control-group">
-                <label for="masterTune">Master Tune <span class="val-display" id="tuneDisplay">440 Hz</span></label>
-                <div class="slider-wrapper">
-                    <input type="range" id="masterTune" min="432" max="448" value="440" step="1">
-                    <div class="ticks">
-                        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="control-group">
-                <label for="volSlider">Master Volume <span class="val-display" id="volDisplay">70%</span></label>
-                <div class="slider-wrapper">
-                    <input type="range" id="volSlider" min="0" max="1" step="0.01" value="0.7">
-                    <div class="ticks">
-                        <span></span><span></span><span></span><span></span><span></span>
-                    </div>
+        <div class="control-group" style="margin-top: 25px;">
+            <label for="masterTune">Master Tune <span class="val-display" id="tuneDisplay">440 Hz</span></label>
+            <div class="slider-wrapper">
+                <input type="range" id="masterTune" min="432" max="448" value="440" step="1">
+                <div class="ticks">
+                    <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
                 </div>
             </div>
         </div>
-        
-        <button id="playBtn" class="play-btn">Play</button>
+
+        <div class="control-group">
+            <label for="volSlider">Master Volume <span class="val-display" id="volDisplay">70%</span></label>
+            <div class="slider-wrapper">
+                <input type="range" id="volSlider" min="0" max="1" step="0.01" value="0.7">
+                <div class="ticks">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <div id="creditsModal" class="modal-overlay">
-    <div class="modal-content">
-        <button id="closeModal" class="close-btn">&times;</button>
+    <div class="modal-content credits-center">
+        <button id="closeCreditsModal" class="close-btn">&times;</button>
         <h2>Pocket Tanpura</h2>
         <p>Version 1.0</p>
         <p class="author">Designed by Bhaskarjyoti Das</p>
@@ -439,17 +586,17 @@
 
     // --- Dynamic Theme Logic ---
     const themes = ['auto', 'light', 'dark'];
-    const themeIcons = { 'auto': '🌓', 'light': '☀️', 'dark': '🌙' };
+    const themeIcons = { 'auto': 'System Auto 🌓', 'light': 'Light Mode ☀️', 'dark': 'Dark Mode 🌙' };
     let currentTheme = localStorage.getItem('tanpura-theme') || 'auto';
 
     function applyTheme(theme) {
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (theme === 'light' || (theme === 'auto' && !prefersDark)) {
             document.body.setAttribute('data-theme', 'light');
-            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f1f5f9');
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#fdf8f0');
         } else {
             document.body.removeAttribute('data-theme');
-            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0f172a');
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#1a1105');
         }
         document.getElementById('themeToggle').innerText = themeIcons[theme];
         localStorage.setItem('tanpura-theme', theme);
@@ -468,18 +615,25 @@
     applyTheme(currentTheme);
 
     // --- Modal Logic ---
-    const modal = document.getElementById('creditsModal');
-    const logoBtn = document.getElementById('appLogo');
-    const closeBtn = document.getElementById('closeModal');
+    const creditsModal = document.getElementById('creditsModal');
+    const settingsModal = document.getElementById('settingsModal');
+    
+    // Credits
+    document.getElementById('appLogo').addEventListener('click', () => creditsModal.classList.add('show'));
+    document.getElementById('closeCreditsModal').addEventListener('click', () => creditsModal.classList.remove('show'));
+    creditsModal.addEventListener('click', (e) => { if (e.target === creditsModal) creditsModal.classList.remove('show'); });
 
-    logoBtn.addEventListener('click', () => modal.classList.add('show'));
-    closeBtn.addEventListener('click', () => modal.classList.remove('show'));
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.classList.remove('show');
-    });
+    // Settings
+    document.getElementById('settingsMenuBtn').addEventListener('click', () => settingsModal.classList.add('show'));
+    document.getElementById('closeSettingsModal').addEventListener('click', () => settingsModal.classList.remove('show'));
+    settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.remove('show'); });
 
-    // --- Audio Synthesis Engine ---
-    let audioCtx, masterGain, isPlaying = false, timerID, currentString = 0;
+
+    // --- Core Audio Synthesis Engine ---
+    let audioCtx, masterGain, analyser, dataArray;
+    let isPlaying = false, timerID;
+    let nextNoteTime = 0.0;
+    let currentString = 0;
     
     const ratios = { 
         'Pa_lower': 0.75, 'Ma_lower': 0.6666, 'Ni_lower': 0.9375, 
@@ -493,7 +647,14 @@
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             masterGain = audioCtx.createGain();
-            masterGain.connect(audioCtx.destination);
+            
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 128; 
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+            
+            masterGain.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            
             masterGain.gain.value = document.getElementById('volSlider').value;
 
             const n = 64; 
@@ -514,9 +675,27 @@
         if (masterGain) masterGain.gain.value = e.target.value;
     });
 
-    function playString(freq, panValue) {
+    // --- Audio Reactivity Loop ---
+    function updateAudioVisuals() {
+        if (!isPlaying) {
+            document.documentElement.style.setProperty('--audio-intensity', '0');
+            return;
+        }
+        requestAnimationFrame(updateAudioVisuals);
+        analyser.getByteFrequencyData(dataArray);
+        
+        let sum = 0;
+        const len = Math.min(dataArray.length, 30); 
+        for(let i = 0; i < len; i++) sum += dataArray[i];
+        
+        let avg = sum / len; 
+        let intensity = Math.min(1, avg / 130); 
+        
+        document.documentElement.style.setProperty('--audio-intensity', intensity.toFixed(3));
+    }
+
+    function playStringScheduled(freq, panValue, startTime) {
         if (!audioCtx) return;
-        const now = audioCtx.currentTime;
         const toneType = document.getElementById('toneSelect').value;
 
         const oscMain = audioCtx.createOscillator();
@@ -563,60 +742,69 @@
         if(panner.pan) panner.pan.value = panValue; 
         else { panner.setPosition(panValue, 0, 1 - Math.abs(panValue)); }
 
-        jawariFilter.frequency.setValueAtTime(freq * 2, now);
-        jawariFilter.frequency.linearRampToValueAtTime(jawariPeakMax, now + 0.6); 
-        jawariFilter.frequency.exponentialRampToValueAtTime(jawariEndFreq, now + decayTime); 
+        jawariFilter.frequency.setValueAtTime(freq * 2, startTime);
+        jawariFilter.frequency.linearRampToValueAtTime(jawariPeakMax, startTime + 0.6); 
+        jawariFilter.frequency.exponentialRampToValueAtTime(jawariEndFreq, startTime + decayTime); 
 
-        envGain.gain.setValueAtTime(0, now);
-        envGain.gain.linearRampToValueAtTime(1, now + 0.08); 
-        envGain.gain.exponentialRampToValueAtTime(0.35, now + 0.8); 
-        envGain.gain.exponentialRampToValueAtTime(0.0001, now + decayTime); 
+        envGain.gain.setValueAtTime(0, startTime);
+        envGain.gain.linearRampToValueAtTime(1, startTime + 0.08); 
+        envGain.gain.exponentialRampToValueAtTime(0.35, startTime + 0.8); 
+        envGain.gain.exponentialRampToValueAtTime(0.0001, startTime + decayTime); 
 
-        oscMain.start(now); oscDetune.start(now);
-        oscMain.stop(now + decayTime); oscDetune.stop(now + decayTime);
+        oscMain.start(startTime); oscDetune.start(startTime);
+        oscMain.stop(startTime + decayTime); oscDetune.stop(startTime + decayTime);
     }
 
-    function scheduleNext() {
+    function schedulerLoop() {
         if (!isPlaying) return;
         
-        const rawBaseFreq = parseFloat(document.getElementById('pitchSelect').value);
-        const octaveMult = parseFloat(document.getElementById('octaveSelect').value);
-        const tuneRatio = parseFloat(document.getElementById('masterTune').value) / 440;
-        
-        const saFreq = rawBaseFreq * octaveMult * tuneRatio;
-        
-        const firstStringMode = document.getElementById('fsSelect').value;
-        const middleStringMode = document.getElementById('msSelect').value;
-        const midFreq = saFreq * ratios[middleStringMode];
+        while (nextNoteTime < audioCtx.currentTime + 1.5) {
+            
+            const rawBaseFreq = parseFloat(document.getElementById('pitchSelect').value);
+            const octaveMult = parseFloat(document.getElementById('octaveSelect').value);
+            const tuneRatio = parseFloat(document.getElementById('masterTune').value) / 440;
+            
+            const saFreq = rawBaseFreq * octaveMult * tuneRatio;
+            const firstStringMode = document.getElementById('fsSelect').value;
+            const middleStringMode = document.getElementById('msSelect').value;
+            const midFreq = saFreq * ratios[middleStringMode];
 
-        const stringFreqs = [ 
-            saFreq * ratios[firstStringMode], 
-            midFreq,                          
-            midFreq,                          
-            saFreq * 0.5                      
-        ];
+            const stringFreqs = [ 
+                saFreq * ratios[firstStringMode], 
+                midFreq,                          
+                midFreq,                          
+                saFreq * 0.5                      
+            ];
 
-        playString(stringFreqs[currentString], pans[currentString]);
+            playStringScheduled(stringFreqs[currentString], pans[currentString], nextNoteTime);
 
-        const stringsUI = document.querySelectorAll('.string');
-        stringsUI.forEach(s => s.classList.remove('active'));
-        void stringsUI[currentString].offsetWidth; 
-        stringsUI[currentString].classList.add('active');
+            const noteIndex = currentString;
+            const uiDelay = (nextNoteTime - audioCtx.currentTime) * 1000;
+            
+            setTimeout(() => {
+                if(!isPlaying) return;
+                const stringsUI = document.querySelectorAll('.string');
+                stringsUI.forEach(s => s.classList.remove('active'));
+                void stringsUI[noteIndex].offsetWidth; 
+                stringsUI[noteIndex].classList.add('active');
+            }, Math.max(0, uiDelay));
 
-        const bpm = parseInt(document.getElementById('speedSlider').value);
-        const cycleDuration = 240000 / bpm; 
-        
-        const style = document.getElementById('pluckStyle').value;
-        let rhythmDelays;
+            const bpm = parseInt(document.getElementById('speedSlider').value);
+            const cycleDuration = 240000 / bpm; 
+            const style = document.getElementById('pluckStyle').value;
+            
+            let rhythmDelays;
+            if (style === 'even') rhythmDelays = [1, 1, 1, 1];
+            else if (style === 'fast') rhythmDelays = [0.8, 0.8, 0.8, 1.2];
+            else rhythmDelays = [1, 1, 1, 2]; 
 
-        if (style === 'even') rhythmDelays = [1, 1, 1, 1];
-        else if (style === 'fast') rhythmDelays = [0.8, 0.8, 0.8, 1.2];
-        else rhythmDelays = [1, 1, 1, 2]; 
+            const delaySeconds = (rhythmDelays[currentString] * (cycleDuration / 5)) / 1000;
+            
+            nextNoteTime += delaySeconds;
+            currentString = (currentString + 1) % 4;
+        }
 
-        const delay = rhythmDelays[currentString] * (cycleDuration / 5);
-
-        currentString = (currentString + 1) % 4;
-        timerID = setTimeout(scheduleNext, delay);
+        timerID = setTimeout(schedulerLoop, 25);
     }
 
     document.getElementById('playBtn').addEventListener('click', async () => {
@@ -627,14 +815,20 @@
         if (isPlaying) {
             isPlaying = false;
             clearTimeout(timerID);
-            btn.innerText = 'Play';
+            btn.querySelector('.btn-icon').innerText = '▶';
+            btn.querySelector('.btn-text').innerText = 'Play';
             btn.classList.remove('playing');
         } else {
             isPlaying = true;
             currentString = 0;
-            btn.innerText = 'Stop';
+            nextNoteTime = audioCtx.currentTime + 0.05; 
+            
+            btn.querySelector('.btn-icon').innerText = '⏹';
+            btn.querySelector('.btn-text').innerText = 'Stop';
             btn.classList.add('playing');
-            scheduleNext();
+            
+            schedulerLoop();
+            updateAudioVisuals(); 
         }
     });
 
