@@ -6,68 +6,79 @@
     <title>Pocket Tanpura</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1a1105">
+    <meta name="theme-color" content="#140a00">
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Pocket Tanpura">
+    <meta name="apple-mobile-web-app-title" content="Tanpura">
     <link rel="apple-touch-icon" href="icon-192.png">
 
-    <style>
-        /* Dark Mode (Base) - Aligned to Golden/Brown Logo */
-        :root {
-            --bg-base: #1a1105; 
-            --shape-1: #c59b27; 
-            --shape-2: #8c5a19; 
-            --glass-bg: transparent; 
-            --glass-border: transparent; 
-            --text-color: #fdf5e6;
-            --text-muted: #d4b895;
-            --accent-color: #d4af37; 
-            --control-bg: rgba(0, 0, 0, 0.4);
-            --control-border: rgba(212, 175, 55, 0.2);
-            
-            /* Engraved variables */
-            --engrave-shadow: rgba(0, 0, 0, 0.95);
-            --engrave-highlight: rgba(255, 255, 255, 0.12);
-            
-            /* 3D Button Depth */
-            --btn-depth-color: #8b6914; 
-            --btn-playing-depth: #641e16;
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 
+    <style>
+        /* Dark Mode (Base) - Vibrant Magenta/Purple Background with Orange Accent */
+        :root {
+            --bg-base: #0a0305; 
+            --shape-1: #e6005c; 
+            --shape-2: #6600cc; 
+            --text-color: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --accent-color: #ffa500; 
+            --control-bg: rgba(20, 8, 12, 0.65);
+            --glass-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.6);
+            
+            --engrave-shadow: rgba(0, 0, 0, 0.95);
+            --engrave-highlight: rgba(255, 165, 0, 0.3);
+            
+            --btn-top: #ffaa00;
+            --btn-bottom: #d47000;
+            --btn-depth-color: #8a4800; 
+            --btn-playing-top: #d32f2f;
+            --btn-playing-bottom: #9a1c1c;
+            --btn-playing-depth: #5c0f0f;
+            
             --audio-intensity: 0; 
+            
+            /* Consistent iOS-like Border Radii */
+            --radius-sm: 14px;
+            --radius-md: 20px;
+            --radius-lg: 28px;
+            --radius-pill: 50px;
         }
 
-        /* Light Mode - Aligned to Golden/Brown Logo */
+        /* Light Mode - Vibrant Palette & Glassmorphic */
         [data-theme="light"] {
-            --bg-base: #fdf8f0; 
-            --shape-1: #e8c37d; 
-            --shape-2: #d4a373; 
-            --glass-bg: transparent; 
-            --glass-border: transparent; 
-            --text-color: #3b2818;
-            --text-muted: #735942;
-            --accent-color: #b8860b; 
-            --control-bg: rgba(255, 255, 255, 0.5);
-            --control-border: rgba(184, 134, 11, 0.2);
+            --bg-base: #fcf5f7; 
+            --shape-1: #ff3377; 
+            --shape-2: #8c33ff; 
+            --text-color: #1a0d00;
+            --text-muted: rgba(26, 13, 0, 0.65);
+            --accent-color: #ff8c00; 
+            --control-bg: rgba(255, 255, 255, 0.85); 
+            --glass-shadow: 0 10px 40px 0 rgba(255, 165, 0, 0.15);
             
-            /* Engraved variables */
-            --engrave-shadow: rgba(0, 0, 0, 0.2);
-            --engrave-highlight: rgba(255, 255, 255, 0.9);
+            --engrave-shadow: rgba(255, 255, 255, 0.9);
+            --engrave-highlight: rgba(0, 0, 0, 0.05);
 
-            /* 3D Button Depth */
-            --btn-depth-color: #8b6508;
-            --btn-playing-depth: #7b241c;
+            --btn-top: #ffaa00;
+            --btn-bottom: #cc6600;
+            --btn-depth-color: #994d00;
+            --btn-playing-top: #d32f2f;
+            --btn-playing-bottom: #aa1e1e;
+            --btn-playing-depth: #7a1515;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             overscroll-behavior-y: none;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -79,7 +90,6 @@
             height: 100dvh; 
             width: 100vw;
             overflow: hidden; 
-            padding: 10px;
             position: relative;
             transition: background-color 0.4s ease;
         }
@@ -87,300 +97,433 @@
         /* --- BACKGROUND LAYER --- */
         .bg-anim-layer {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: -2; overflow: hidden;
+            z-index: -3; overflow: hidden;
         }
 
         .drift-container { position: absolute; width: 100%; height: 100%; }
         
-        .mover1 { animation: drift1 20s infinite alternate ease-in-out; }
-        .mover2 { animation: drift2 25s infinite alternate-reverse ease-in-out; }
-        .mover3 { animation: drift3 15s infinite alternate ease-in-out; }
+        .mover1 { animation: drift1 18s infinite alternate ease-in-out; }
+        .mover2 { animation: drift2 22s infinite alternate-reverse ease-in-out; }
 
-        @keyframes drift1 { 0% { transform: translate(-5vw, -5vh) rotate(0deg); } 100% { transform: translate(25vw, 15vh) rotate(45deg); } }
-        @keyframes drift2 { 0% { transform: translate(5vw, 5vh) rotate(0deg); } 100% { transform: translate(-20vw, -15vh) rotate(-30deg); } }
-        @keyframes drift3 { 0% { transform: translate(0vw, 10vh); } 100% { transform: translate(-15vw, -20vh); } }
+        @keyframes drift1 { 
+            0% { transform: translate(-10vw, -10vh) rotate(0deg) scale(0.9); } 
+            100% { transform: translate(35vw, 25vh) rotate(45deg) scale(1.5); } 
+        }
+        @keyframes drift2 { 
+            0% { transform: translate(10vw, 10vh) rotate(0deg) scale(1.2); } 
+            100% { transform: translate(-30vw, -25vh) rotate(-30deg) scale(0.8); } 
+        }
 
         .bg-shape {
             position: absolute;
             border-radius: 50%;
-            transform: scale(calc(1 + var(--audio-intensity) * 0.8));
-            transition: transform 0.08s ease-out, opacity 0.08s ease-out;
+            transform: scale(calc(1 + var(--audio-intensity) * 0.5));
+            transition: transform 0.1s ease-out, opacity 0.1s ease-out;
         }
 
         .shape1 { 
-            width: 65vw; height: 65vw; min-width: 450px; min-height: 450px;
-            background: var(--shape-1); filter: blur(90px);
+            width: 75vw; height: 75vw; min-width: 450px; min-height: 450px;
+            background: var(--shape-1); filter: blur(120px);
             top: -15%; left: -15%; 
-            opacity: calc(0.35 + (var(--audio-intensity) * 0.5));
+            opacity: calc(0.2 + (var(--audio-intensity) * 0.25)); 
         }
         
         .shape2 { 
-            width: 75vw; height: 75vw; min-width: 500px; min-height: 500px;
-            background: var(--shape-2); filter: blur(100px);
+            width: 85vw; height: 85vw; min-width: 500px; min-height: 500px;
+            background: var(--shape-2); filter: blur(140px);
             bottom: -20%; right: -15%; 
-            opacity: calc(0.25 + (var(--audio-intensity) * 0.6));
+            opacity: calc(0.15 + (var(--audio-intensity) * 0.3)); 
+        }
+
+        /* --- FLOATING SPHERES --- */
+        .spheres-layer {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -2; pointer-events: none; overflow: hidden;
         }
         
-        .shape3 { 
-            width: 50vw; height: 50vw; min-width: 350px; min-height: 350px;
-            background: var(--accent-color); filter: blur(120px);
-            top: 25%; left: 25%;
-            opacity: calc(0.05 + (var(--audio-intensity) * 0.8));
-            transform: scale(calc(0.8 + var(--audio-intensity) * 1.5));
+        .sphere-wrapper { position: absolute; width: 100%; height: 100%; }
+        .sphere {
+            position: absolute; border-radius: 50%;
+            opacity: 0.04; filter: blur(15px);
+            transition: transform 2.5s cubic-bezier(0.1, 1, 0.3, 1), opacity 2.5s ease;
+        }
+        
+        .sw0 { animation: floatS 12s infinite alternate ease-in-out; }
+        .sw1 { animation: floatS 14s infinite alternate-reverse ease-in-out; }
+        .sw2 { animation: floatS 11s infinite alternate ease-in-out; }
+        .sw3 { animation: floatS 16s infinite alternate-reverse ease-in-out; }
+        
+        @keyframes floatS { 0% { transform: translateY(10vh) translateX(-5vw); } 100% { transform: translateY(-10vh) translateX(5vw); } }
+
+        #sphere0 { width: 45vw; height: 45vw; top: 15%; left: 5%; background: radial-gradient(circle, var(--shape-1) 0%, transparent 65%);}
+        #sphere1 { width: 50vw; height: 50vw; top: 45%; right: 5%; background: radial-gradient(circle, var(--shape-2) 0%, transparent 65%);}
+        #sphere2 { width: 40vw; height: 40vw; bottom: 10%; left: 15%; background: radial-gradient(circle, var(--shape-1) 0%, transparent 65%);}
+        #sphere3 { width: 60vw; height: 60vw; top: 30%; left: 30%; background: radial-gradient(circle, var(--shape-2) 0%, transparent 65%);}
+
+        .sphere.active {
+            opacity: 0.4; 
+            transform: scale(1.6); 
+            transition: none;
         }
 
         .bg-vignette {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.9) 150%);
+            background: radial-gradient(circle at center, transparent 10%, rgba(0,0,0,0.92) 150%);
             z-index: -1; pointer-events: none; transition: background 0.4s ease;
         }
         [data-theme="light"] .bg-vignette {
-            background: radial-gradient(circle at center, transparent 20%, rgba(255,255,255,0.75) 150%);
+            background: radial-gradient(circle at center, transparent 10%, rgba(255,255,255,0.75) 150%);
         }
 
-        /* App Container */
+        /* --- MAIN APP CONTAINER --- */
         .app-container {
             width: 100%;
-            max-width: 420px;
-            height: 96dvh; 
+            max-width: 430px; 
+            height: 100%;
+            max-height: 932px; 
+            margin: auto;
             display: flex;
             flex-direction: column;
-            padding: 2vh 1.25rem; 
+            justify-content: space-evenly; 
+            padding: 2vh 1.8rem; 
             z-index: 1;
+            overflow: hidden; 
+            position: relative;
         }
 
+        @media (min-width: 500px) and (min-height: 800px) {
+            .app-container {
+                height: 90vh;
+                border-radius: 40px;
+                background: rgba(10, 3, 5, 0.4);
+                box-shadow: var(--glass-shadow);
+                backdrop-filter: blur(30px);
+                -webkit-backdrop-filter: blur(30px);
+            }
+            [data-theme="light"] .app-container {
+                background: rgba(255, 250, 240, 0.5);
+            }
+        }
+
+        /* HEADER */
         .header-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-shrink: 0;
-            padding-bottom: 1.5vh;
+            width: 100%;
         }
 
-        /* --- TRUE ENGRAVED STAMP LOGO --- */
         h1 { 
             font-weight: 900; 
-            letter-spacing: 2px; 
-            font-size: 0.9rem; /* Smaller, stamped look */
+            letter-spacing: 2.5px; 
+            font-size: 0.95rem; 
             text-transform: uppercase;
-            cursor: pointer; 
-            /* Color exact match to background to sink it into the material */
             color: var(--accent-color); 
-            /* Dark shadow top-left, Light highlight bottom-right simulates a physical engraving */
-            text-shadow: 
-                -1px -1px 2px var(--engrave-shadow),
-                 1px  1px 1px var(--engrave-highlight);
-            opacity: 0.7; 
-            transition: color 0.4s ease, text-shadow 0.4s ease;
+            text-shadow: -1px -1px 2px var(--engrave-shadow), 1px 1px 1px var(--engrave-highlight);
+            cursor: default; 
         }
 
-        /* Top Right Menu Toggle */
         .icon-btn {
-            background: transparent;
-            border: none;
-            color: var(--accent-color);
-            border-radius: 50%;
-            width: 38px; height: 38px;
-            font-size: 1.6rem;
+            background: transparent; border: none;
+            color: var(--text-muted); 
+            border-radius: var(--radius-pill);
+            width: 44px; height: 44px; 
+            display: flex; justify-content: flex-end; align-items: center;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
             cursor: pointer;
-            display: flex; justify-content: center; align-items: center;
-            transition: transform 0.2s, color 0.2s;
         }
-        .icon-btn:active { transform: scale(0.85); }
+        .icon-btn:active { transform: scale(0.85); color: var(--accent-color); }
 
-        /* --- PERFECTLY EVEN FLEX SPACING AREA --- */
-        .controls-scroll {
+        /* CONTROLS LAYOUT */
+        .controls-wrapper {
             display: flex;
             flex-direction: column;
-            overflow: hidden; 
-            flex-grow: 1;
-            /* Mathematically spaces every child element perfectly equally */
+            width: 100%;
             justify-content: space-evenly; 
-            gap: 1vh; /* Safety gap for tiny screens */
+            flex-grow: 1; 
+            max-height: 65vh;
         }
 
-        /* Force strictly zero margins on direct children to allow flexbox to do 100% of the spacing */
-        .controls-scroll > * {
-            margin-top: 0 !important;
-            margin-bottom: 0 !important;
-            flex-shrink: 1;
-        }
-
-        .control-group.inline-flex { display: flex; align-items: center; gap: 12px; }
-        .control-group.inline-flex > * { flex: 1; }
+        .control-group.inline-flex { display: flex; align-items: center; gap: 20px; } 
+        .control-group.inline-flex > * { flex: 1; min-width: 0; display: flex; flex-direction: column;}
         
         label { 
-            display: flex; 
-            justify-content: space-between; 
-            letter-spacing: 0.2px;
-            font-size: 0.85rem; 
-            margin-bottom: 8px; /* Comfortable padding between label and button */
-            font-weight: 600; 
-            color: var(--text-color);
+            display: block; 
+            text-align: center; 
+            text-transform: uppercase;
+            font-weight: 700; 
+            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
         }
-        .val-display { 
-            color: var(--accent-color); 
-            font-weight: bold; 
-            font-variant-numeric: tabular-nums;
-            letter-spacing: 0.2px; 
-            font-size: medium;
-            opacity: 0.8;
-            vertical-align: center !important;
-        }
+        [data-theme="light"] label { text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
 
-        /* Increased and Uniform Select Heights */
-        select, .settings-theme-btn {
-            width: 100%; 
+        .main-label { font-size: 0.75rem; letter-spacing: 1.5px; margin-bottom: 12px; color: var(--text-color); }
+        .sub-label { font-size: 0.65rem; letter-spacing: 1.2px; margin-bottom: 10px; color: var(--text-muted); }
+
+        /* BORDERLESS SELECTS */
+        select {
             background: var(--control-bg); 
-            color: var(--text-color);
-            border: 1px solid var(--control-border); 
-            height: auto; /* Explicit and robust uniform height */
-            padding: 10px 10px; 
-            border-radius: 12px;
-            font-size: 0.85rem; 
+            color: var(--accent-color);
+            border: none; 
+            box-shadow: var(--glass-shadow);
             outline: none; 
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
             appearance: none; 
             -webkit-appearance: none;
             text-align: center; 
-            font-weight: 600; 
+            font-weight: 700; 
             cursor: pointer; 
-            color: var(--accent-color);
-            transition: background 0.2s;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
         }
+        select:active { transform: scale(0.96); }
         select option { background: var(--bg-base); color: var(--text-color); text-align: center; }
 
-        /* Sliders */
-        .slider-wrapper { position: relative; margin-bottom: 0.5vh; }
-        input[type=range] { 
-            width: 100%; -webkit-appearance: none; padding: 0; height: 26px; 
-            background: transparent; border: none; outline: none; z-index: 2; position: relative;
+        .sub-input {
+            width: 100%;
+            padding: 12px 6px; 
+            border-radius: var(--radius-md); 
+            font-size: 0.85rem; 
+            height: 52px; 
         }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
-            background: var(--accent-color); cursor: pointer; margin-top: -8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 5px; background: var(--control-border); border-radius: 3px; }
-        
-        .ticks { 
-            display: flex; justify-content: space-between; padding: 0 8px; 
-            margin-top: -12px; pointer-events: none; z-index: 1; position: relative; opacity: 0.6;
-        }
-        .ticks span { width: 2px; height: 6px; background: var(--text-muted); border-radius: 1px; }
 
-        /* --- VISUALIZER --- */
-        .visualizer-card {
-            background: var(--control-bg); border: 1px solid var(--control-border);
-            border-radius: 16px; 
-            padding: 18px 16px; 
-            box-shadow: inset 0 4px 10px rgba(0,0,0,0.2);
-            backdrop-filter: blur(20px);
+        /* PORTRAIT STEPPER CARDS (Pitch & Tempo) */
+        .stepper-card {
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            justify-content: space-between;
+            background: var(--control-bg);
+            border: none;
+            box-shadow: var(--glass-shadow);
+            border-radius: var(--radius-lg);
+            padding: 12px;
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            height: 170px; 
         }
-        .visualizer {
-            display: flex; justify-content: space-evenly; 
-            height: 6vh; 
-            min-height: 45px; 
-            align-items: center; margin-bottom: 2.5vh;
-        }
-        .string { width: 3px; height: 100%; background: var(--control-border); border-radius: 2px; }
         
-        @keyframes pluckVibrate {
-            0% { transform: scaleX(1); background: var(--control-border); }
-            10% { transform: scaleX(3) translateX(2px); background: var(--accent-color); box-shadow: 0 0 15px var(--accent-color); }
-            20% { transform: scaleX(2.5) translateX(-2px); }
-            30% { transform: scaleX(3) translateX(1px); }
-            40% { transform: scaleX(2) translateX(-1px); }
-            60% { transform: scaleX(2.5) translateX(0); background: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); }
-            100% { transform: scaleX(1); background: var(--control-border); box-shadow: none; }
-        }
-        .string.active { animation: pluckVibrate 0.8s ease-out forwards; }
-
-        /* --- 3D RUBBER PLAY BUTTON --- */
-        .play-btn {
+        .stepper-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 2rem;
+            font-weight: 300;
+            cursor: pointer;
             width: 100%; 
-            align-self: center;
-            height: 75px; 
-            min-height: 75px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            display: flex; justify-content: center; align-items: center;
+        }
+        .stepper-btn:active {
+            transform: scale(0.85);
+            color: var(--accent-color);
+        }
+
+        /* Fully transparent tempo/pitch wrapper */
+        .stepper-display-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            width: 100%;
+            background: transparent;
+            box-shadow: none;
+            border: none;
+            position: relative;
+        }
+
+        /* Custom Pitch Select Overlay */
+        .pitch-select {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.001; /* Invisible but clickable */
+            z-index: 2;
+            cursor: pointer;
+            -webkit-appearance: none;
+            border: none;
+        }
+
+        .pitch-display {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .pitch-main, .tempo-val {
+            color: var(--accent-color);
+            font-size: 1.9rem; 
+            font-weight: 900;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+
+        .pitch-main sub {
+            font-size: 1rem;
+            font-weight: 700;
+            vertical-align: baseline;
+            position: relative;
+            top: 0.2em;
+        }
+
+        .pitch-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            font-weight: 600;
+        }
+
+        /* INTEGRATED PLAY BUTTON & VISUALIZER */
+        .play-btn {
+            width: 85%; 
+            margin: 0 auto; 
+            height: 85px; 
+            min-height: 85px;
             font-size: 1.5rem; 
-            letter-spacing: 1px;
-            font-weight: 800; 
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 900; 
             color: #fff;
-            margin-bottom: 4px !important;
             
-            background-color: var(--accent-color); 
-            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.15"/></svg>');
-            
+            background: linear-gradient(145deg, var(--btn-top), var(--btn-bottom));
             border: none; 
-            border-radius: 20px;
+            border-radius: var(--radius-pill); 
             cursor: pointer; 
             
-            box-shadow: 0 8px 0 var(--btn-depth-color);
+            box-shadow: 
+                0 8px 0 var(--btn-depth-color), 
+                0 20px 30px rgba(0,0,0,0.5),
+                inset 0 2px 2px rgba(255,255,255,0.25);
+                
             transform: translateY(0);
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
             
-            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.1s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s;
-            
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
+            position: relative;
+            overflow: hidden; 
         }
         
         .play-btn:active { 
             transform: translateY(8px); 
-            box-shadow: 0 0px 0 var(--btn-depth-color); 
+            box-shadow: 
+                0 0px 0 var(--btn-depth-color), 
+                0 5px 10px rgba(0,0,0,0.5),
+                inset 0 2px 2px rgba(255,255,255,0.25);
         }
         
         .play-btn.playing { 
-            background-color: #c0392b; 
-            box-shadow: 0 8px 0 var(--btn-playing-depth);
+            background: linear-gradient(145deg, var(--btn-playing-top), var(--btn-playing-bottom));
+            box-shadow: 
+                0 8px 0 var(--btn-playing-depth), 
+                0 20px 30px rgba(0,0,0,0.5),
+                inset 0 2px 2px rgba(255,255,255,0.25);
         }
         
         .play-btn.playing:active { 
             transform: translateY(8px);
-            box-shadow: 0 0px 0 var(--btn-playing-depth);
+            box-shadow: 
+                0 0px 0 var(--btn-playing-depth), 
+                0 5px 10px rgba(0,0,0,0.5),
+                inset 0 2px 2px rgba(255,255,255,0.25);
         }
 
-        .btn-icon { font-size: 1.5rem; margin-top: 1px; }
+        #waveCanvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            mix-blend-mode: screen; 
+            opacity: 0.9;
+        }
 
-        /* --- UNIFORM HIGH VISIBILITY MODALS --- */
+        .play-content {
+            position: relative;
+            z-index: 1;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 12px;
+            width: 100%; height: 100%;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        }
+        .btn-icon { margin-top: -2px; }
+
+        /* COMPACT SETTINGS MODAL UI */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
-            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             display: flex; justify-content: center; align-items: center;
-            z-index: 100; visibility: hidden; opacity: 0;
+            z-index: 99999; visibility: hidden; opacity: 0;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
         .modal-overlay.show { visibility: visible; opacity: 1; }
         
-        /* Same width constraint for both Modals */
         .modal-content {
-            background: var(--bg-base); 
-            border: 1px solid var(--control-border);
-            border-radius: 16px; 
-            padding: 30px 25px;
-            text-align: left; color: var(--text-color);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            background: rgba(10, 3, 5, 0.95); 
+            border: none;
+            border-radius: var(--radius-md); 
+            padding: 20px 15px; 
+            color: var(--text-color);
+            box-shadow: var(--glass-shadow), 0 20px 50px rgba(0,0,0,0.8);
+            backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
             position: relative; 
-            width: 340px; 
-            max-width: 90vw;
-            box-sizing: border-box;
+            width: 300px; max-width: 90vw; 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
+        [data-theme="light"] .modal-content { background: rgba(255, 250, 240, 0.95); }
         
-        .modal-content.credits-center { text-align: center; }
-        .modal-content h2 { color: var(--accent-color); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; }
-        .modal-content p { font-size: 0.95rem; color: var(--text-muted); margin-bottom: auto; }
-        .modal-content .author { margin-top: 20px; color: var(--text-color); font-weight: 600; }
+        .modal-content h2 { text-align: center; color: var(--accent-color); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; margin-bottom: 5px;}
         
         .close-btn {
-            position: absolute; top: 10px; right: 15px;
+            position: absolute; top: 5px; right: 10px;
             background: none; border: none; font-size: 1.5rem;
-            color: var(--text-muted); cursor: pointer; transition: color 0.2s;
+            color: var(--text-muted); cursor: pointer; 
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            border-radius: var(--radius-pill);
         }
-        .close-btn:hover { color: var(--text-color); }
+        .close-btn:hover, .close-btn:active { color: var(--accent-color); transform: scale(0.85); }
 
-        .settings-content .control-group { margin-bottom: 20px; }
-        .settings-content label { margin-bottom: 10px; }
+        .settings-content label { display: block; text-align: center; margin-bottom: 6px; font-size: 0.65rem; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;}
+        
+        .modal-select { width: 100%; padding: 0 10px; border-radius: var(--radius-sm); font-size: 0.85rem; height: 40px;} 
+        
+        .theme-btn {
+            width: 100%; background: var(--control-bg); color: var(--accent-color);
+            border: none; box-shadow: var(--glass-shadow); border-radius: var(--radius-sm);
+            font-size: 0.85rem; font-weight: 700; height: 40px; cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .theme-btn:active { transform: scale(0.96); }
+
+        /* Horizontal Steppers for Modal Settings */
+        .horizontal-stepper {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--control-bg); border-radius: var(--radius-sm); box-shadow: var(--glass-shadow);
+            padding: 4px; height: 45px;
+        }
+        .horizontal-stepper .stepper-btn {
+            width: 35px; height: 35px; font-size: 1.5rem;
+        }
+        .horizontal-stepper .stepper-val {
+            font-size: 1rem; font-weight: 800; color: var(--accent-color); text-align: center; flex: 1;
+        }
+
+        /* Credits Section */
+        .credits-section {
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 15px;
+            margin-top: 5px;
+        }
+        [data-theme="light"] .credits-section { border-top: 1px solid rgba(0, 0, 0, 0.08); }
+        .credits-section h3 { font-size: 0.9rem; color: var(--text-color); margin-bottom: 5px; font-weight: 700; }
+        .credits-section p { font-size: 0.7rem; color: var(--text-muted); line-height: 1.6; }
+        .credits-section .author { font-weight: 700; color: var(--accent-color); margin-top: 6px; }
 
     </style>
 </head>
@@ -389,209 +532,289 @@
 <div class="bg-anim-layer">
     <div class="drift-container mover1"><div class="bg-shape shape1"></div></div>
     <div class="drift-container mover2"><div class="bg-shape shape2"></div></div>
-    <div class="drift-container mover3"><div class="bg-shape shape3"></div></div>
 </div>
+
+<div class="spheres-layer">
+    <div class="sphere-wrapper sw0"><div class="sphere" id="sphere0"></div></div>
+    <div class="sphere-wrapper sw1"><div class="sphere" id="sphere1"></div></div>
+    <div class="sphere-wrapper sw2"><div class="sphere" id="sphere2"></div></div>
+    <div class="sphere-wrapper sw3"><div class="sphere" id="sphere3"></div></div>
+</div>
+
 <div class="bg-vignette"></div>
 
 <div class="app-container">
     <div class="header-row">
         <h1 id="appLogo">Pocket Tanpura</h1>
-        <div class="header-icons">
-            <button id="settingsMenuBtn" class="icon-btn" title="Settings">⋮</button>
-        </div>
+        <button id="settingsMenuBtn" class="icon-btn" title="Settings">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="5" r="2.5"></circle>
+                <circle cx="12" cy="12" r="2.5"></circle>
+                <circle cx="12" cy="19" r="2.5"></circle>
+            </svg>
+        </button>
     </div>
 
-    <div class="controls-scroll">
+    <div class="controls-wrapper">
         
-        <div class="control-group">
-            <label for="pitchSelect">Base Pitch (Sa)</label>
-            <select id="pitchSelect">
-                <option value="27.50">A0 (Safed 6 / 6 Kattai)</option>
-                <option value="29.14">A#0 (Kali 5 / 6.5 Kattai)</option>
-                <option value="30.87">B0 (Safed 7 / 7 Kattai)</option>
-                <option value="32.70" selected>C1 (Safed 1 / 1 Kattai)</option>
-                <option value="34.65">C#1 (Kali 1 / 1.5 Kattai)</option>
-                <option value="36.71">D1 (Safed 2 / 2 Kattai)</option>
-                <option value="38.89">D#1 (Kali 2 / 2.5 Kattai)</option>
-                <option value="41.20">E1 (Safed 3 / 3 Kattai)</option>
-                <option value="43.65">F1 (Safed 4 / 4 Kattai)</option>
-                <option value="46.25">F#1 (Kali 3 / 4.5 Kattai)</option>
-                <option value="49.00">G1 (Safed 5 / 5 Kattai)</option>
-                <option value="51.91">G#1 (Kali 4 / 5.5 Kattai)</option>
-                <option value="55.00">A1 (Safed 6 / 6 Kattai)</option>
-                <option value="58.27">A#1 (Kali 5 / 6.5 Kattai)</option>
-                <option value="61.74">B1 (Safed 7 / 7 Kattai)</option>
-                <option value="65.41">C2 (Safed 1 / 1 Kattai)</option>
-            </select>
-        </div>
-
         <div class="control-group inline-flex">
-            <div>
-                <label for="fsSelect">First String</label>
-                <select id="fsSelect">
-                    <option value="Pa_lower" selected>Mandra Pancham (Pa 5th)</option>
-                    <option value="Ma_lower">Mandra Madhyam (Ma 4th)</option>
-                    <option value="Ni_lower">Mandra Nishad (Ni 7th)</option>
-                </select>
-            </div>
-            <div>
-                <label for="msSelect">Middle Strings</label>
-                <select id="msSelect">
-                    <option value="Sa" selected>Shuddha Shadja (Sa Root)</option>
-                    <option value="Re_komal">Komal Rishabh (k. Re)</option>
-                    <option value="Re">Shuddha Rishabh (S. Re)</option>
-                    <option value="Ga_komal">Komal Gandhar (k. Ga)</option>
-                    <option value="Ga">Shuddha Gandhar (S. Ga)</option>
-                    <option value="Ma">Shuddha Madhyam (S. Ma)</option>
-                    <option value="Ni">Shuddha Nishad (S. Ni)</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="control-group">
-            <label for="octaveSelect">Tanpura Octave</label>
-            <select id="octaveSelect">
-                <option value="1">Kharaj / Deep Bass (x1)</option>
-                <option value="2">Mandra / Standard Male (x2)</option>
-                <option value="4" selected>Madhya / Standard Female (x4)</option>
-                <option value="8">Taar / High Soprano (x8)</option>
-            </select>
-        </div>
-
-        <div class="control-group inline-flex">
-            <div>
-                <label for="pluckStyle">Pluck Style</label>
-                <select id="pluckStyle">
-                    <option value="standard" selected>Authentic Rhythm</option>
-                    <option value="even">Continuous Even</option>
-                    <option value="fast">Urgent Fast</option>
-                </select>
-            </div>
-            <div>
-                <label for="toneSelect">Synthesis Tone</label>
-                <select id="toneSelect">
-                    <option value="rich" selected>Rich Harmonic</option>
-                    <option value="mellow">Mellow Soft</option>
-                    <option value="deep">Deep Acoustic</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="visualizer-card">
-            <div class="visualizer">
-                <div class="string" id="str0"></div>
-                <div class="string" id="str1"></div>
-                <div class="string" id="str2"></div>
-                <div class="string" id="str3"></div>
-            </div>
-            <div class="control-group">
-                <label for="speedSlider">Pluck Speed <span class="val-display" id="speedDisplay">50 BPM</span></label>
-                <div class="slider-wrapper">
-                    <input type="range" id="speedSlider" min="30" max="130" value="50" step="1">
-                    <div class="ticks">
-                        <span></span><span></span><span></span><span></span><span></span>
+            <div style="flex: 1;">
+                <label class="main-label">Base Pitch</label>
+                <div class="stepper-card">
+                    <button class="stepper-btn" id="pitchUp">+</button>
+                    <div class="stepper-display-wrapper">
+                        <select id="pitchSelect" class="pitch-select">
+                            <option value="27.50">A0 (Safed 6)</option>
+                            <option value="29.14">A#0 (Kali 5)</option>
+                            <option value="30.87">B0 (Safed 7)</option>
+                            <option value="32.70">C1 (Safed 1)</option>
+                            <option value="34.65">C#1 (Kali 1)</option>
+                            <option value="36.71">D1 (Safed 2)</option>
+                            <option value="38.89">D#1 (Kali 2)</option>
+                            <option value="41.20">E1 (Safed 3)</option>
+                            <option value="43.65" selected>F1 (Safed 4)</option>
+                            <option value="46.25">F#1 (Kali 3)</option>
+                            <option value="49.00">G1 (Safed 5)</option>
+                            <option value="51.91">G#1 (Kali 4)</option>
+                            <option value="55.00">A1 (Safed 6)</option>
+                            <option value="58.27">A#1 (Kali 5)</option>
+                            <option value="61.74">B1 (Safed 7)</option>
+                            <option value="65.41">C2 (Safed 1)</option>
+                        </select>
+                        <div id="pitchDisplayUI" class="pitch-display">
+                            <div id="pitchMainDisplay" class="pitch-main">F<sub>1</sub></div>
+                            <div id="pitchSubDisplay" class="pitch-sub">Safed 4</div>
+                        </div>
                     </div>
+                    <button class="stepper-btn" id="pitchDown">−</button>
+                </div>
+            </div>
+            
+            <div style="flex: 1;">
+                <label class="main-label">Tempo</label>
+                <div class="stepper-card">
+                    <button class="stepper-btn tempo-btn" data-val="1">+</button>
+                    <div class="stepper-display-wrapper">
+                        <span class="tempo-val" id="tempoDisplay">70</span>
+                    </div>
+                    <button class="stepper-btn tempo-btn" data-val="-1">−</button>
                 </div>
             </div>
         </div>
-        
-        <button id="playBtn" class="play-btn">
-            <span class="btn-icon">▶</span> <span class="btn-text">Play</span>
-        </button>
+
+        <div class="control-group inline-flex">
+            <div>
+                <label class="sub-label">First String</label>
+                <select id="fsSelect" class="sub-input">
+                    <option value="Pa_lower" selected>Mandra Pa</option>
+                    <option value="Ma_lower">Mandra Ma</option>
+                    <option value="Ni_lower">Mandra Ni</option>
+                </select>
+            </div>
+            <div>
+                <label class="sub-label">Middle Strings</label>
+                <select id="msSelect" class="sub-input">
+                    <option value="Sa" selected>Shuddha Sa</option>
+                    <option value="Re_komal">Komal Re</option>
+                    <option value="Re">Shuddha Re</option>
+                    <option value="Ga_komal">Komal Ga</option>
+                    <option value="Ga">Shuddha Ga</option>
+                    <option value="Ma">Shuddha Ma</option>
+                    <option value="Ni">Shuddha Ni</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="control-group inline-flex">
+            <div>
+                <label class="sub-label">Octave</label>
+                <select id="octaveSelect" class="sub-input">
+                    <option value="1">Kharaj</option>
+                    <option value="2" selected>Mandra</option>
+                    <option value="4">Madhya</option>
+                    <option value="8">Taar</option>
+                </select>
+            </div>
+            <div>
+                <label class="sub-label">Tone</label>
+                <select id="toneSelect" class="sub-input">
+                    <option value="rich" selected>Rich</option>
+                    <option value="mellow">Mellow</option>
+                    <option value="deep">Deep</option>
+                </select>
+            </div>
+        </div>
+
     </div>
+    
+    <button id="playBtn" class="play-btn">
+        <canvas id="waveCanvas"></canvas>
+        <div class="play-content">
+            <span class="btn-icon">▶</span> <span class="btn-text">Play</span>
+        </div>
+    </button>
 </div>
 
 <div id="settingsModal" class="modal-overlay">
     <div class="modal-content settings-content">
         <button id="closeSettingsModal" class="close-btn">&times;</button>
         <h2>Settings</h2>
-        <br>
+        
         <div class="control-group">
             <label>App Theme</label>
-            <button id="themeToggle" class="settings-theme-btn">Auto 🌓</button>
+            <button id="themeToggle" class="theme-btn">Auto 🌓</button>
+        </div>
+        
+        <div class="control-group">
+            <label>Rhythm Style</label>
+            <select id="pluckStyle" class="modal-select">
+                <option value="standard" selected>Authentic</option>
+                <option value="even">Even Delay</option>
+                <option value="fast">Fast Cycle</option>
+            </select>
         </div>
 
-        <div class="control-group" style="margin-top: 25px;">
-            <label for="masterTune">Master Tune <span class="val-display" id="tuneDisplay">440 Hz</span></label>
-            <div class="slider-wrapper">
-                <input type="range" id="masterTune" min="432" max="448" value="440" step="1">
-                <div class="ticks">
-                    <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-                </div>
+        <div class="control-group">
+            <label>Master Tune</label>
+            <div class="horizontal-stepper">
+                <button class="stepper-btn tune-btn" data-val="-1">−</button>
+                <span class="stepper-val" id="tuneDisplay">440 Hz</span>
+                <button class="stepper-btn tune-btn" data-val="1">+</button>
             </div>
         </div>
 
         <div class="control-group">
-            <label for="volSlider">Master Volume <span class="val-display" id="volDisplay">70%</span></label>
-            <div class="slider-wrapper">
-                <input type="range" id="volSlider" min="0" max="1" step="0.01" value="0.7">
-                <div class="ticks">
-                    <span></span><span></span><span></span><span></span><span></span>
-                </div>
+            <label>Master Volume</label>
+            <div class="horizontal-stepper">
+                <button class="stepper-btn vol-btn" data-val="-0.05">−</button>
+                <span class="stepper-val" id="volDisplay">70%</span>
+                <button class="stepper-btn vol-btn" data-val="0.05">+</button>
             </div>
         </div>
-    </div>
-</div>
 
-<div id="creditsModal" class="modal-overlay">
-    <div class="modal-content credits-center">
-        <button id="closeCreditsModal" class="close-btn">&times;</button>
-        <h2>Pocket Tanpura</h2>
-        <br>
-        <p>Synthetic Harmonic Drone</p>
-        <p>Version 1.0</p>
-        <p class="author">Designed by Bhaskarjyoti Das</p>
-        <br>
-        <p>Made in India 🇮🇳</p>
+        <div class="credits-section">
+            <h3>Pocket Tanpura</h3>
+            <p class="author">Designed by Bhaskarjyoti Das</p>
+            <p>Made in India 🇮🇳</p>
+        </div>
     </div>
 </div>
 
 <script>
     // --- UI Listeners & Updates ---
-    const speedSlider = document.getElementById('speedSlider');
-    const speedDisplay = document.getElementById('speedDisplay');
-    const masterTune = document.getElementById('masterTune');
     const tuneDisplay = document.getElementById('tuneDisplay');
-    const volSlider = document.getElementById('volSlider');
     const volDisplay = document.getElementById('volDisplay');
+    const tempoDisplay = document.getElementById('tempoDisplay');
+    const pitchSelect = document.getElementById('pitchSelect');
+    const pitchMainDisplay = document.getElementById('pitchMainDisplay');
+    const pitchSubDisplay = document.getElementById('pitchSubDisplay');
+
+    let currentTempo = 70;
+    let masterTuneVal = 440;
+    let masterVolVal = 0.7;
 
     function updateLabels() {
-        speedDisplay.innerText = `${speedSlider.value} BPM`;
-        tuneDisplay.innerText = `${masterTune.value} Hz`;
-        volDisplay.innerText = `${Math.round(volSlider.value * 100)}%`;
+        tuneDisplay.innerText = `${masterTuneVal} Hz`;
+        volDisplay.innerText = `${Math.round(masterVolVal * 100)}%`;
+        tempoDisplay.innerText = currentTempo;
     }
 
-    speedSlider.addEventListener('input', updateLabels);
-    masterTune.addEventListener('input', updateLabels);
-    volSlider.addEventListener('input', updateLabels);
+    // Custom Pitch Display Formatter
+    function updatePitchDisplay() {
+        const selectedText = pitchSelect.options[pitchSelect.selectedIndex].text;
+        // Matches e.g., "C#1 (Kali 1)" -> [1]: "C#", [2]: "1", [3]: "Kali 1"
+        const match = selectedText.match(/^([A-G]#?)(\d)\s*\((.+)\)$/);
+        if (match) {
+            pitchMainDisplay.innerHTML = `${match[1]}<sub>${match[2]}</sub>`;
+            pitchSubDisplay.innerText = match[3];
+        } else {
+            pitchMainDisplay.innerText = selectedText;
+            pitchSubDisplay.innerText = '';
+        }
+    }
+
+    // Pitch Stepper Logic
+    document.getElementById('pitchUp').addEventListener('click', () => {
+        if(pitchSelect.selectedIndex < pitchSelect.options.length - 1) {
+            pitchSelect.selectedIndex++;
+            updatePitchDisplay();
+            saveSettings();
+        }
+    });
+    document.getElementById('pitchDown').addEventListener('click', () => {
+        if(pitchSelect.selectedIndex > 0) {
+            pitchSelect.selectedIndex--;
+            updatePitchDisplay();
+            saveSettings();
+        }
+    });
+    pitchSelect.addEventListener('change', () => {
+        updatePitchDisplay();
+        saveSettings();
+    });
+
+    // Tempo Buttons Logic
+    document.querySelectorAll('.tempo-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const change = parseInt(e.target.getAttribute('data-val'));
+            currentTempo = Math.max(30, Math.min(130, currentTempo + change));
+            updateLabels();
+            saveSettings();
+        });
+    });
+
+    // Tune Buttons Logic
+    document.querySelectorAll('.tune-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const change = parseInt(e.target.getAttribute('data-val'));
+            masterTuneVal = Math.max(432, Math.min(448, masterTuneVal + change));
+            updateLabels();
+            saveSettings();
+        });
+    });
+
+    // Volume Buttons Logic
+    document.querySelectorAll('.vol-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const change = parseFloat(e.target.getAttribute('data-val'));
+            masterVolVal = Math.max(0, Math.min(1, masterVolVal + change));
+            if (masterGain) masterGain.gain.value = masterVolVal;
+            updateLabels();
+            saveSettings();
+        });
+    });
 
     // --- State & Storage ---
-    const settingsControls = ['pitchSelect', 'fsSelect', 'msSelect', 'octaveSelect', 'pluckStyle', 'toneSelect', 'masterTune', 'speedSlider', 'volSlider'];
+    const settingsControls = ['pitchSelect', 'fsSelect', 'msSelect', 'octaveSelect', 'pluckStyle', 'toneSelect'];
 
     function saveSettings() {
         settingsControls.forEach(id => {
             const el = document.getElementById(id);
             if (el) localStorage.setItem('tanpura_' + id, el.value);
         });
+        localStorage.setItem('tanpura_tempo', currentTempo);
+        localStorage.setItem('tanpura_tune', masterTuneVal);
+        localStorage.setItem('tanpura_vol', masterVolVal);
     }
 
     function loadSettings() {
         settingsControls.forEach(id => {
             const val = localStorage.getItem('tanpura_' + id);
             const el = document.getElementById(id);
-            if (val !== null && el) {
-                el.value = val;
-            }
+            if (val !== null && el) el.value = val;
         });
+        
+        if(localStorage.getItem('tanpura_tempo')) currentTempo = parseInt(localStorage.getItem('tanpura_tempo'));
+        if(localStorage.getItem('tanpura_tune')) masterTuneVal = parseInt(localStorage.getItem('tanpura_tune'));
+        if(localStorage.getItem('tanpura_vol')) masterVolVal = parseFloat(localStorage.getItem('tanpura_vol'));
+        
+        updatePitchDisplay();
         updateLabels(); 
     }
 
     settingsControls.forEach(id => {
         const el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('change', saveSettings);
-            if (el.type === 'range') el.addEventListener('input', saveSettings);
-        }
+        if (el) el.addEventListener('change', saveSettings);
     });
 
     document.addEventListener('DOMContentLoaded', loadSettings);
@@ -605,10 +828,10 @@
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (theme === 'light' || (theme === 'auto' && !prefersDark)) {
             document.body.setAttribute('data-theme', 'light');
-            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#fdf8f0');
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#fcf5f7');
         } else {
             document.body.removeAttribute('data-theme');
-            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#1a1105');
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0a0305');
         }
         document.getElementById('themeToggle').innerText = themeIcons[theme];
         localStorage.setItem('tanpura-theme', theme);
@@ -627,25 +850,22 @@
     applyTheme(currentTheme);
 
     // --- Modal Logic ---
-    const creditsModal = document.getElementById('creditsModal');
     const settingsModal = document.getElementById('settingsModal');
     
-    // Credits
-    document.getElementById('appLogo').addEventListener('click', () => creditsModal.classList.add('show'));
-    document.getElementById('closeCreditsModal').addEventListener('click', () => creditsModal.classList.remove('show'));
-    creditsModal.addEventListener('click', (e) => { if (e.target === creditsModal) creditsModal.classList.remove('show'); });
-
-    // Settings
     document.getElementById('settingsMenuBtn').addEventListener('click', () => settingsModal.classList.add('show'));
     document.getElementById('closeSettingsModal').addEventListener('click', () => settingsModal.classList.remove('show'));
     settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.remove('show'); });
 
-
     // --- Core Audio Synthesis Engine ---
     let audioCtx, masterGain, analyser, dataArray;
+    let reverbGain; 
     let isPlaying = false, timerID;
     let nextNoteTime = 0.0;
     let currentString = 0;
+    
+    const silentWavBase64 = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+    const bgKeepAliveAudio = new Audio(silentWavBase64);
+    bgKeepAliveAudio.loop = true;
     
     const ratios = { 
         'Pa_lower': 0.75, 'Ma_lower': 0.6666, 'Ni_lower': 0.9375, 
@@ -664,107 +884,192 @@
             analyser.fftSize = 128; 
             dataArray = new Uint8Array(analyser.frequencyBinCount);
             
+            reverbGain = audioCtx.createGain();
+            reverbGain.gain.value = 0.15; 
+
+            const delayNode = audioCtx.createDelay();
+            delayNode.delayTime.value = 0.12; 
+            
+            const delayFeedback = audioCtx.createGain();
+            delayFeedback.gain.value = 0.25; 
+            
+            const delayFilter = audioCtx.createBiquadFilter();
+            delayFilter.type = 'lowpass';
+            delayFilter.frequency.value = 1800; 
+
+            reverbGain.connect(delayNode);
+            delayNode.connect(delayFilter);
+            delayFilter.connect(delayFeedback);
+            delayFeedback.connect(delayNode);
+            delayNode.connect(masterGain);
+            
             masterGain.connect(analyser);
             analyser.connect(audioCtx.destination);
-            
-            masterGain.gain.value = document.getElementById('volSlider').value;
+            masterGain.gain.value = masterVolVal;
 
             const n = 64; 
             const real = new Float32Array(n);
             const imag = new Float32Array(n);
             for (let i = 1; i < n; i++) {
-                let amp = 1 / Math.pow(i, 1.4); 
-                if (i === 2 || i === 3) amp *= 1.2; 
-                if (i >= 5 && i <= 8) amp *= 1.5; 
-                if (i >= 12 && i <= 20) amp *= 1.3; 
+                let amp = 1 / Math.pow(i, 1.25); 
+                if (i === 2 || i === 3) amp *= 1.6; 
+                if (i >= 5 && i <= 8) amp *= 1.9; 
+                if (i >= 12 && i <= 16) amp *= 1.4; 
                 real[i] = amp;
             }
             window.tanpuraWave = audioCtx.createPeriodicWave(real, imag);
         }
     }
 
-    document.getElementById('volSlider').addEventListener('input', (e) => {
-        if (masterGain) masterGain.gain.value = e.target.value;
-    });
+    // --- INTEGRATED AIRSTREAM WAVE VISUALIZER LOGIC ---
+    const waveCanvas = document.getElementById('waveCanvas');
+    const waveCtx = waveCanvas.getContext('2d');
+    let waveTime = 0;
 
-    // --- Audio Reactivity Loop ---
-    function updateAudioVisuals() {
-        if (!isPlaying) {
-            document.documentElement.style.setProperty('--audio-intensity', '0');
-            return;
-        }
-        requestAnimationFrame(updateAudioVisuals);
-        analyser.getByteFrequencyData(dataArray);
-        
-        let sum = 0;
-        const len = Math.min(dataArray.length, 30); 
-        for(let i = 0; i < len; i++) sum += dataArray[i];
-        
-        let avg = sum / len; 
-        let intensity = Math.min(1, avg / 130); 
-        
-        document.documentElement.style.setProperty('--audio-intensity', intensity.toFixed(3));
+    function resizeCanvas() {
+        const btnRect = document.getElementById('playBtn').getBoundingClientRect();
+        waveCanvas.width = btnRect.width * window.devicePixelRatio;
+        waveCanvas.height = btnRect.height * window.devicePixelRatio;
+        waveCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
     }
+    window.addEventListener('resize', resizeCanvas);
+    document.addEventListener('DOMContentLoaded', resizeCanvas);
+
+    function updateAudioVisuals() {
+        requestAnimationFrame(updateAudioVisuals); 
+        
+        let intensity = 0;
+        if (isPlaying && analyser) {
+            analyser.getByteFrequencyData(dataArray);
+            let sum = 0;
+            const len = Math.min(dataArray.length, 30); 
+            for(let i = 0; i < len; i++) sum += dataArray[i];
+            let avg = sum / len; 
+            intensity = Math.min(1, avg / 130); 
+            document.documentElement.style.setProperty('--audio-intensity', intensity.toFixed(3));
+        } else {
+            document.documentElement.style.setProperty('--audio-intensity', '0');
+        }
+
+        const w = waveCanvas.offsetWidth;
+        const h = waveCanvas.offsetHeight;
+        waveCtx.clearRect(0, 0, w, h);
+        const centerY = h / 2;
+        
+        const numWaves = 4;
+        for(let j = 0; j < numWaves; j++) {
+            waveCtx.beginPath();
+            
+            const phase = waveTime * (0.8 + j * 0.2) + j * Math.PI / 3;
+            // Extremely large swells and movement in idle/active states
+            const amp = 20 + (intensity * (h / 0.8)) * (1 - j * 0.1); 
+            
+            // Render in a faded shade of accent orange
+            const alpha = 0.15 + (intensity * 0.4) + (j === 2 ? 0.2 : 0); 
+            waveCtx.strokeStyle = `rgba(255, 165, 0, ${alpha})`;
+            waveCtx.lineWidth = j === 2 ? 4 : 2.5;
+            
+            for(let i = 0; i <= w; i += 4) {
+                const normalizedX = i / w;
+                const edgeTaper = Math.sin(normalizedX * Math.PI); 
+                
+                const y = centerY + (Math.sin(normalizedX * 4 + phase) + Math.sin(normalizedX * 8 - phase * 0.5) * 0.3) * amp * edgeTaper;
+                
+                if(i === 0) waveCtx.moveTo(i, y);
+                else waveCtx.lineTo(i, y);
+            }
+            waveCtx.stroke();
+        }
+        waveTime += 0.02 + (intensity * 0.06); 
+    }
+    
+    setTimeout(resizeCanvas, 100);
+    updateAudioVisuals();
 
     function playStringScheduled(freq, panValue, startTime) {
         if (!audioCtx) return;
         const toneType = document.getElementById('toneSelect').value;
 
         const oscMain = audioCtx.createOscillator();
-        const oscDetune = audioCtx.createOscillator();
+        const oscDetuneSharp = audioCtx.createOscillator();
+        const oscDetuneFlat = audioCtx.createOscillator();
+        
         oscMain.setPeriodicWave(window.tanpuraWave);
-        oscDetune.setPeriodicWave(window.tanpuraWave);
+        oscDetuneSharp.setPeriodicWave(window.tanpuraWave);
+        oscDetuneFlat.setPeriodicWave(window.tanpuraWave);
         
         oscMain.frequency.value = freq;
-        oscDetune.frequency.value = freq * 1.002; 
+        oscDetuneSharp.frequency.value = freq * 1.0025; 
+        oscDetuneFlat.frequency.value = freq * 0.9975; 
 
         const mainGain = audioCtx.createGain(); 
-        const detuneGain = audioCtx.createGain();
+        const detuneSharpGain = audioCtx.createGain();
+        const detuneFlatGain = audioCtx.createGain();
+        
         const bodyFilter = audioCtx.createBiquadFilter(); 
+        const formantFilter = audioCtx.createBiquadFilter(); 
         const jawariFilter = audioCtx.createBiquadFilter(); 
+        
         const panner = audioCtx.createStereoPanner ? audioCtx.createStereoPanner() : audioCtx.createPanner();
         const envGain = audioCtx.createGain();
 
         let jawariPeakMax, jawariEndFreq, decayTime;
 
         if (toneType === 'rich') {
-            mainGain.gain.value = 0.55; detuneGain.gain.value = 0.45;
-            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 4; bodyFilter.Q.value = 1.8; bodyFilter.gain.value = 6;
-            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 1.5;
-            jawariPeakMax = freq * 18; jawariEndFreq = freq * 1.5; decayTime = 13.0;
+            mainGain.gain.value = 0.45; detuneSharpGain.gain.value = 0.27; detuneFlatGain.gain.value = 0.27;
+            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 3.5; bodyFilter.Q.value = 1.8; bodyFilter.gain.value = 7;
+            formantFilter.type = 'peaking'; formantFilter.frequency.value = freq * 6; formantFilter.Q.value = 1.5; formantFilter.gain.value = 4;
+            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 1.8;
+            jawariPeakMax = freq * 22; jawariEndFreq = freq * 1.5; decayTime = 12.0; 
         } else if (toneType === 'mellow') {
-            mainGain.gain.value = 0.7; detuneGain.gain.value = 0.3;
-            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 2.5; bodyFilter.Q.value = 1.2; bodyFilter.gain.value = 4;
-            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 0.8;
-            jawariPeakMax = freq * 8; jawariEndFreq = freq * 1.2; decayTime = 11.0;
+            mainGain.gain.value = 0.6; detuneSharpGain.gain.value = 0.2; detuneFlatGain.gain.value = 0.2;
+            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 2.5; bodyFilter.Q.value = 1.2; bodyFilter.gain.value = 5;
+            formantFilter.type = 'peaking'; formantFilter.frequency.value = freq * 4; formantFilter.Q.value = 1.0; formantFilter.gain.value = 2;
+            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 1.0;
+            jawariPeakMax = freq * 10; jawariEndFreq = freq * 1.2; decayTime = 10.0;
         } else { 
-            mainGain.gain.value = 0.85; detuneGain.gain.value = 0.15;
-            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 1.5; bodyFilter.Q.value = 0.8; bodyFilter.gain.value = 2;
-            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 0.4;
-            jawariPeakMax = freq * 4; jawariEndFreq = freq * 1.0; decayTime = 9.0;
+            mainGain.gain.value = 0.7; detuneSharpGain.gain.value = 0.15; detuneFlatGain.gain.value = 0.15;
+            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 1.5; bodyFilter.Q.value = 0.8; bodyFilter.gain.value = 3;
+            formantFilter.type = 'peaking'; formantFilter.frequency.value = freq * 2; formantFilter.Q.value = 0.5; formantFilter.gain.value = 1;
+            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 0.5;
+            jawariPeakMax = freq * 5; jawariEndFreq = freq * 1.0; decayTime = 8.0;
         }
 
-        oscMain.connect(mainGain); oscDetune.connect(detuneGain);
-        mainGain.connect(bodyFilter); detuneGain.connect(bodyFilter);
-        bodyFilter.connect(jawariFilter);
+        oscMain.connect(mainGain); 
+        oscDetuneSharp.connect(detuneSharpGain);
+        oscDetuneFlat.connect(detuneFlatGain);
+        mainGain.connect(bodyFilter); 
+        detuneSharpGain.connect(bodyFilter);
+        detuneFlatGain.connect(bodyFilter);
+        bodyFilter.connect(formantFilter);
+        formantFilter.connect(jawariFilter);
         jawariFilter.connect(panner);
         panner.connect(envGain);
-        envGain.connect(masterGain);
+        
+        envGain.connect(masterGain); 
+        envGain.connect(reverbGain);
         
         if(panner.pan) panner.pan.value = panValue; 
         else { panner.setPosition(panValue, 0, 1 - Math.abs(panValue)); }
 
-        jawariFilter.frequency.setValueAtTime(freq * 2, startTime);
-        jawariFilter.frequency.linearRampToValueAtTime(jawariPeakMax, startTime + 0.6); 
+        jawariFilter.frequency.setValueAtTime(freq * 3, startTime);
+        jawariFilter.frequency.linearRampToValueAtTime(jawariPeakMax, startTime + 0.8); 
         jawariFilter.frequency.exponentialRampToValueAtTime(jawariEndFreq, startTime + decayTime); 
 
         envGain.gain.setValueAtTime(0, startTime);
-        envGain.gain.linearRampToValueAtTime(1, startTime + 0.08); 
-        envGain.gain.exponentialRampToValueAtTime(0.35, startTime + 0.8); 
-        envGain.gain.exponentialRampToValueAtTime(0.0001, startTime + decayTime); 
+        envGain.gain.linearRampToValueAtTime(1, startTime + 0.1); 
+        envGain.gain.exponentialRampToValueAtTime(0.35, startTime + 1.2); 
+        envGain.gain.exponentialRampToValueAtTime(0.001, startTime + decayTime); 
 
-        oscMain.start(startTime); oscDetune.start(startTime);
-        oscMain.stop(startTime + decayTime); oscDetune.stop(startTime + decayTime);
+        const volModOsc = audioCtx.createOscillator();
+        volModOsc.frequency.value = freq / 200; 
+        const volModDepth = audioCtx.createGain();
+        volModDepth.gain.value = 0.05; 
+        volModOsc.connect(volModDepth);
+        volModDepth.connect(envGain.gain);
+
+        oscMain.start(startTime); oscDetuneSharp.start(startTime); oscDetuneFlat.start(startTime); volModOsc.start(startTime);
+        oscMain.stop(startTime + decayTime); oscDetuneSharp.stop(startTime + decayTime); oscDetuneFlat.stop(startTime + decayTime); volModOsc.stop(startTime + decayTime);
     }
 
     function schedulerLoop() {
@@ -774,7 +1079,7 @@
             
             const rawBaseFreq = parseFloat(document.getElementById('pitchSelect').value);
             const octaveMult = parseFloat(document.getElementById('octaveSelect').value);
-            const tuneRatio = parseFloat(document.getElementById('masterTune').value) / 440;
+            const tuneRatio = masterTuneVal / 440;
             
             const saFreq = rawBaseFreq * octaveMult * tuneRatio;
             const firstStringMode = document.getElementById('fsSelect').value;
@@ -795,14 +1100,14 @@
             
             setTimeout(() => {
                 if(!isPlaying) return;
-                const stringsUI = document.querySelectorAll('.string');
-                stringsUI.forEach(s => s.classList.remove('active'));
-                void stringsUI[noteIndex].offsetWidth; 
-                stringsUI[noteIndex].classList.add('active');
+                const sphere = document.getElementById('sphere' + noteIndex);
+                if (sphere) {
+                    sphere.classList.add('active');
+                    setTimeout(() => sphere.classList.remove('active'), 50); 
+                }
             }, Math.max(0, uiDelay));
 
-            const bpm = parseInt(document.getElementById('speedSlider').value);
-            const cycleDuration = 240000 / bpm; 
+            const cycleDuration = 240000 / currentTempo; 
             const style = document.getElementById('pluckStyle').value;
             
             let rhythmDelays;
@@ -819,8 +1124,31 @@
         timerID = setTimeout(schedulerLoop, 25);
     }
 
+    function setupMediaSession() {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: 'Tanpura Drone',
+                artist: 'Pocket Tanpura',
+                artwork: [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' }]
+            });
+            navigator.mediaSession.setActionHandler('play', () => { document.getElementById('playBtn').click(); });
+            navigator.mediaSession.setActionHandler('pause', () => { document.getElementById('playBtn').click(); });
+        }
+    }
+
+    function requestPushNotification() {
+        const asked = localStorage.getItem('tanpura_notif_asked');
+        if (!asked && "Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+            Notification.requestPermission().then(() => {
+                localStorage.setItem('tanpura_notif_asked', 'true');
+            });
+        }
+    }
+
     document.getElementById('playBtn').addEventListener('click', async () => {
         initAudio();
+        requestPushNotification();
+        
         if (audioCtx.state === 'suspended') await audioCtx.resume();
         const btn = document.getElementById('playBtn');
 
@@ -830,17 +1158,31 @@
             btn.querySelector('.btn-icon').innerText = '▶';
             btn.querySelector('.btn-text').innerText = 'Play';
             btn.classList.remove('playing');
+            
+            bgKeepAliveAudio.pause();
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+            
+            document.querySelectorAll('.sphere').forEach(s => s.classList.remove('active'));
         } else {
             isPlaying = true;
             currentString = 0;
             nextNoteTime = audioCtx.currentTime + 0.05; 
             
+            resizeCanvas(); 
+            
             btn.querySelector('.btn-icon').innerText = '⏹';
             btn.querySelector('.btn-text').innerText = 'Stop';
             btn.classList.add('playing');
             
+            bgKeepAliveAudio.play().catch(e => console.log('Keep-alive prevented', e));
+            setupMediaSession();
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+            
             schedulerLoop();
-            updateAudioVisuals(); 
+            
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("Pocket Tanpura is playing", { icon: "icon-192.png", silent: true });
+            }
         }
     });
 
