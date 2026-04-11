@@ -24,11 +24,15 @@
             --shape-1: #e6005c; 
             --shape-2: #6600cc; 
             --text-color: #ffffff;
-            --text-muted: rgba(255, 255, 255, 0.6);
+            --text-muted: rgba(255, 255, 255, 0.85); 
             --accent-color: #ffa500; 
-            --control-bg: rgba(20, 8, 12, 0.65);
-            --glass-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.6);
             
+            --control-bg: rgba(20, 8, 12, 0.5); 
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            --text-glow: 0 2px 6px rgba(0, 0, 0, 0.95); 
+            
+            --modal-bg: #1a080f; /* Solid dark color for modal */
+
             --engrave-shadow: rgba(0, 0, 0, 0.95);
             --engrave-highlight: rgba(255, 165, 0, 0.3);
             
@@ -41,7 +45,6 @@
             
             --audio-intensity: 0; 
             
-            /* Consistent iOS-like Border Radii */
             --radius-sm: 14px;
             --radius-md: 20px;
             --radius-lg: 28px;
@@ -53,12 +56,16 @@
             --bg-base: #fcf5f7; 
             --shape-1: #ff3377; 
             --shape-2: #8c33ff; 
-            --text-color: #1a0d00;
-            --text-muted: rgba(26, 13, 0, 0.65);
+            --text-color: #000000;
+            --text-muted: rgba(0, 0, 0, 0.7);
             --accent-color: #ff8c00; 
-            --control-bg: rgba(255, 255, 255, 0.85); 
-            --glass-shadow: 0 10px 40px 0 rgba(255, 165, 0, 0.15);
             
+            --control-bg: rgba(255, 255, 255, 0.6); 
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            --text-glow: 0 1px 4px rgba(255, 255, 255, 1); 
+            
+            --modal-bg: #ffffff; /* Solid light color for modal */
+
             --engrave-shadow: rgba(255, 255, 255, 0.9);
             --engrave-highlight: rgba(0, 0, 0, 0.05);
 
@@ -70,38 +77,31 @@
             --btn-playing-depth: #7a1515;
         }
 
-        * {
-            box-sizing: border-box;
+        html, body {
             margin: 0;
             padding: 0;
+            width: 100vw;
+            height: 100dvh;
+            overflow: hidden;
+            overscroll-behavior: none; 
+            background-color: var(--bg-base);
+            color: var(--text-color);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            overscroll-behavior-y: none;
             user-select: none;
             -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-base);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100dvh; 
-            width: 100vw;
-            overflow: hidden; 
-            position: relative;
             transition: background-color 0.4s ease;
         }
+
+        * { box-sizing: border-box; }
 
         /* --- BACKGROUND LAYER --- */
         .bg-anim-layer {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: -3; overflow: hidden;
+            z-index: -3; overflow: hidden; pointer-events: none;
         }
 
         .drift-container { position: absolute; width: 100%; height: 100%; }
-        
         .mover1 { animation: drift1 18s infinite alternate ease-in-out; }
         .mover2 { animation: drift2 22s infinite alternate-reverse ease-in-out; }
 
@@ -140,7 +140,6 @@
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             z-index: -2; pointer-events: none; overflow: hidden;
         }
-        
         .sphere-wrapper { position: absolute; width: 100%; height: 100%; }
         .sphere {
             position: absolute; border-radius: 50%;
@@ -160,11 +159,7 @@
         #sphere2 { width: 40vw; height: 40vw; bottom: 10%; left: 15%; background: radial-gradient(circle, var(--shape-1) 0%, transparent 65%);}
         #sphere3 { width: 60vw; height: 60vw; top: 30%; left: 30%; background: radial-gradient(circle, var(--shape-2) 0%, transparent 65%);}
 
-        .sphere.active {
-            opacity: 0.4; 
-            transform: scale(1.6); 
-            transition: none;
-        }
+        .sphere.active { opacity: 0.4; transform: scale(1.6); transition: none; }
 
         .bg-vignette {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -178,32 +173,31 @@
         /* --- MAIN APP CONTAINER --- */
         .app-container {
             width: 100%;
-            max-width: 430px; 
+            max-width: 450px; 
             height: 100%;
-            max-height: 932px; 
-            margin: auto;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Centers the whole block on tall screens */
-            gap: 16px; /* Uniform gap throughout */
-            padding: 3vh 1.8rem; 
+            justify-content: space-between; 
+            padding: max(env(safe-area-inset-top), 4vh) 1.5rem max(env(safe-area-inset-bottom), 4vh);
             z-index: 1;
-            overflow: hidden; 
             position: relative;
+            overflow: hidden;
+            border: none;
         }
 
         @media (min-width: 500px) and (min-height: 800px) {
+            body { display: flex; align-items: center; justify-content: center; }
             .app-container {
                 height: 90vh;
                 border-radius: 40px;
-                background: rgba(10, 3, 5, 0.4);
+                background: rgba(10, 3, 5, 0.3);
                 box-shadow: var(--glass-shadow);
-                backdrop-filter: blur(30px);
-                -webkit-backdrop-filter: blur(30px);
+                backdrop-filter: blur(40px) saturate(150%);
+                -webkit-backdrop-filter: blur(40px) saturate(150%);
+                border: none;
             }
-            [data-theme="light"] .app-container {
-                background: rgba(255, 250, 240, 0.5);
-            }
+            [data-theme="light"] .app-container { background: rgba(255, 250, 240, 0.4); }
         }
 
         /* HEADER */
@@ -212,23 +206,25 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            margin-bottom: 8px; /* Slight extra breathing room under header */
+            flex: 0 0 auto;
         }
 
         h1 { 
             font-weight: 900; 
             letter-spacing: 2px; 
-            font-size: 0.8rem; /* Made logo smaller */
+            font-size: 0.8rem; 
             text-transform: uppercase;
             color: var(--accent-color); 
             text-shadow: -1px -1px 2px var(--engrave-shadow), 1px 1px 1px var(--engrave-highlight);
             cursor: default; 
+            margin: 0;
         }
 
         .icon-btn {
             background: transparent; border: none;
-            color: var(--text-muted); 
-            border-radius: var(--radius-lg) !important;
+            color: var(--text-color); 
+            text-shadow: var(--text-glow);
+            border-radius: var(--radius-lg);
             width: 44px; height: 44px; 
             display: flex; justify-content: flex-end; align-items: center;
             transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
@@ -236,38 +232,72 @@
         }
         .icon-btn:active { transform: scale(0.85); color: var(--accent-color); }
 
-        /* CSS GRID CONTROLS LAYOUT */
+        /* CONTROLS GRID */
         .controls-grid {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            gap: max(2vh, 12px);
+            width: 100%;
+            margin-top: max(2vh, 10px);
+            margin-bottom: max(2vh, 10px);
+            min-height: 0; 
+        }
+
+        .top-row-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px; /* Equal spacing between columns and rows */
-            width: 100%;
+            gap: max(1.5vh, 12px);
+            flex: 0 0 50%; 
+            min-height: 0;
+        }
+
+        /* Grouped frosted container for bottom controls */
+        .bottom-group-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: max(1vh, 8px);
+            flex: 1 1 auto; 
+            min-height: 0;
+            
+            background: var(--control-bg);
+            border-radius: var(--radius-lg);
+            padding: max(1.5vh, 12px);
+            box-shadow: var(--glass-shadow);
+            border: none;
+            backdrop-filter: blur(40px) saturate(150%);
+            -webkit-backdrop-filter: blur(40px) saturate(150%);
         }
 
         .control-cell {
             display: flex;
             flex-direction: column;
             width: 100%;
+            height: 100%;
+            justify-content: center;
+            min-height: 0;
         }
 
-        .control-cell.full-width {
-            grid-column: 1 / -1; /* Spans across both columns */
-        }
+        .control-cell.full-width { grid-column: 1 / -1; }
         
+        /* Unified Labels Styling */
         label { 
             display: block; 
             text-align: center; 
-            text-transform: uppercase;
-            font-weight: 700; 
-            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+            font-weight: 400; 
+            font-size: 0.65rem; 
+            letter-spacing: 1px; 
+            color: var(--text-color); 
+            opacity: 0.6;
+            text-transform: none; /* Relies on HTML capitalization */
+            text-shadow: none; /* Keep simple and clean */
         }
-        [data-theme="light"] label { text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
 
-        /* Labels brought closer to containers */
-        .main-label { font-size: 0.75rem; letter-spacing: 1.5px; margin-bottom: 6px; color: var(--text-color); }
-        .sub-label { font-size: 0.65rem; letter-spacing: 1.2px; margin-bottom: 6px; color: var(--text-muted); }
+        .main-label { margin-bottom: 8px; }
+        .sub-label { margin-bottom: 6px; }
 
-        /* PORTRAIT STEPPER CARDS (Pitch & Tempo) */
+        /* FROSTY DYNAMIC HEIGHT CARDS */
         .stepper-card {
             display: flex;
             flex-direction: column; 
@@ -277,119 +307,84 @@
             border: none;
             box-shadow: var(--glass-shadow);
             border-radius: var(--radius-lg);
-            padding: 14px;
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            height: 155px; /* Slightly reduced height for better mobile fit */
+            padding: 12px 6px;
+            backdrop-filter: blur(40px) saturate(150%);
+            -webkit-backdrop-filter: blur(40px) saturate(150%);
+            height: 100%; 
+            min-height: 0; 
         }
         
         .stepper-btn {
             background: transparent;
             border: none;
             color: var(--text-muted);
-            font-size: 2rem;
+            text-shadow: var(--text-glow);
+            font-size: clamp(1.8rem, 4vh, 2.2rem); 
             font-weight: 300;
             cursor: pointer;
             width: 100%; 
-            height: 35px;
+            flex: 0 0 auto;
             border-radius: var(--radius-sm);
             transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
             display: flex; justify-content: center; align-items: center;
         }
-        .stepper-btn:active {
-            transform: scale(0.85);
-            color: var(--accent-color);
-        }
+        .stepper-btn:active { transform: scale(0.85); color: var(--accent-color); }
 
-        /* Fully transparent tempo/pitch wrapper */
         .stepper-display-wrapper {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            flex: 1;
-            width: 100%;
-            background: transparent;
-            box-shadow: none;
-            border: none;
-            position: relative;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            flex: 1; width: 100%; position: relative; min-height: 0;
         }
 
-        /* Custom Pitch Select Overlay */
         .pitch-select {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0.001; /* Invisible but clickable */
-            z-index: 2;
-            cursor: pointer;
-            -webkit-appearance: none;
-            border: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.001; z-index: 2; cursor: pointer; -webkit-appearance: none; border: none;
         }
 
         .pitch-display {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 1;
-            pointer-events: none;
+            z-index: 1; pointer-events: none;
         }
 
         .pitch-main, .tempo-val {
             color: var(--accent-color);
-            font-size: 1.9rem; 
-            font-weight: 900;
-            font-variant-numeric: tabular-nums;
-            line-height: 1;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.7);
+            font-size: clamp(1.6rem, 4vh, 2rem);
+            font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1;
         }
+        [data-theme="light"] .pitch-main, [data-theme="light"] .tempo-val { text-shadow: 0 2px 4px rgba(255,255,255,0.8); }
 
-        .pitch-main sub {
-            font-size: 1rem;
-            font-weight: 700;
-            vertical-align: baseline;
-            position: relative;
-            top: 0.2em;
-        }
+        .pitch-main sub { font-size: 0.5em; font-weight: 700; vertical-align: baseline; position: relative; top: 0.2em; }
+        .pitch-sub { font-size: 0.7rem; color: var(--text-muted); text-shadow: var(--text-glow); margin-top: 6px; font-weight: 600; }
 
-        .pitch-sub {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 6px;
-            font-weight: 600;
-        }
-
-        /* Horizontal Steppers (General & Sub Controls) */
         .horizontal-stepper {
             display: flex; justify-content: space-between; align-items: center;
-            background: var(--control-bg); border-radius: var(--radius-sm); box-shadow: var(--glass-shadow);
-            padding: 4px; height: 45px;
-            width: 100%; /* Ensures it fills its grid cell */
+            background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); 
+            padding: 4px; height: 100%; min-height: 0; width: 100%;
+            border: none;
         }
-        .horizontal-stepper .stepper-btn {
-            width: 35px; height: 35px; font-size: 1.5rem;
+        [data-theme="light"] .horizontal-stepper { background: rgba(255,255,255,0.4); border: none; }
+
+        .horizontal-stepper .stepper-btn { width: 40px; height: 100%; font-size: clamp(1.5rem, 3vh, 1.8rem); }
+        .horizontal-stepper .stepper-val { 
+            font-size: clamp(0.75rem, 1.8vh, 0.9rem); font-weight: 700; 
+            color: var(--accent-color); text-shadow: 0 1px 3px rgba(0,0,0,0.8); 
+            text-align: center; flex: 1; 
         }
-        .horizontal-stepper .stepper-val {
-            font-size: 1rem; font-weight: 800; color: var(--accent-color); text-align: center; flex: 1;
+        [data-theme="light"] .horizontal-stepper .stepper-val { text-shadow: 0 1px 2px rgba(255,255,255,1); }
+
+        /* PLAY SECTION & SPEAKER INFO */
+        .play-section {
+            flex: 0 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* Specific modifications for Sub Controls to match previous input style */
-        .sub-stepper {
-            height: 52px;
-            border-radius: var(--radius-md);
-        }
-        .sub-stepper .stepper-val {
-            font-size: 0.85rem; 
-            font-weight: 700;
-        }
-        .sub-stepper .stepper-btn {
-            width: 40px; height: 40px; font-size: 1.8rem;
-        }
-
-        /* INTEGRATED PLAY BUTTON & VISUALIZER */
         .play-btn {
-            width: 100%; /* Now takes full width of the layout */
-            margin: 0; 
-            height: 85px; 
-            min-height: 85px;
+            width: 100%; 
+            height: clamp(75px, 10vh, 90px); 
             font-size: 1.5rem; 
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -408,58 +403,65 @@
                 
             transform: translateY(0);
             transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-            
-            position: relative;
-            overflow: hidden; 
+            position: relative; overflow: hidden; 
         }
         
         .play-btn:active { 
             transform: translateY(8px); 
-            box-shadow: 
-                0 0px 0 var(--btn-depth-color), 
-                0 5px 10px rgba(0,0,0,0.5),
-                inset 0 2px 2px rgba(255,255,255,0.25);
+            box-shadow: 0 0px 0 var(--btn-depth-color), 0 5px 10px rgba(0,0,0,0.5), inset 0 2px 2px rgba(255,255,255,0.25);
         }
         
         .play-btn.playing { 
             background: linear-gradient(145deg, var(--btn-playing-top), var(--btn-playing-bottom));
-            box-shadow: 
-                0 8px 0 var(--btn-playing-depth), 
-                0 20px 30px rgba(0,0,0,0.5),
-                inset 0 2px 2px rgba(255,255,255,0.25);
+            box-shadow: 0 8px 0 var(--btn-playing-depth), 0 20px 30px rgba(0,0,0,0.5), inset 0 2px 2px rgba(255,255,255,0.25);
         }
         
         .play-btn.playing:active { 
             transform: translateY(8px);
-            box-shadow: 
-                0 0px 0 var(--btn-playing-depth), 
-                0 5px 10px rgba(0,0,0,0.5),
-                inset 0 2px 2px rgba(255,255,255,0.25);
+            box-shadow: 0 0px 0 var(--btn-playing-depth), 0 5px 10px rgba(0,0,0,0.5), inset 0 2px 2px rgba(255,255,255,0.25);
         }
 
-        #waveCanvas {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 0;
-            pointer-events: none;
-            mix-blend-mode: screen; 
-            opacity: 0.9;
-        }
+        #waveCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; mix-blend-mode: screen; opacity: 0.9; }
 
         .play-content {
-            position: relative;
-            z-index: 1;
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 12px;
-            width: 100%; height: 100%;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; 
+            gap: 12px; width: 100%; height: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.4);
         }
         .btn-icon { margin-top: -2px; }
 
-        /* COMPACT SETTINGS MODAL UI */
+        @keyframes breathe {
+            0%, 100% { opacity: 0.4; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.15); }
+        }
+
+        .speaker-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.6rem; 
+            color: var(--text-muted); 
+            text-shadow: var(--text-glow);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            padding: 12px; 
+            height: auto;
+            min-height: 1rem;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .speaker-icon {
+            width: 14px;
+            height: 14px;
+            margin-right: 6px;
+            color: currentColor; 
+            animation: breathe 2.5s infinite ease-in-out;
+        }
+
+        /* MODAL UI */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
             background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -470,54 +472,30 @@
         .modal-overlay.show { visibility: visible; opacity: 1; }
         
         .modal-content {
-            background: rgba(10, 3, 5, 0.95); 
-            border: none;
-            border-radius: var(--radius-md); 
-            padding: 20px 15px; 
-            color: var(--text-color);
-            box-shadow: var(--glass-shadow), 0 20px 50px rgba(0,0,0,0.8);
-            backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
-            position: relative; 
-            width: 300px; max-width: 90vw; 
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            background: var(--modal-bg); /* Solid visibility */
+            border: 1px solid rgba(255,255,255,0.05); border-radius: var(--radius-md); 
+            padding: 20px 15px; color: var(--text-color); box-shadow: var(--glass-shadow), 0 20px 50px rgba(0,0,0,0.8);
+            position: relative; width: 320px; max-width: 90vw; display: flex; flex-direction: column; gap: 15px;
         }
-        [data-theme="light"] .modal-content { background: rgba(255, 250, 240, 0.95); }
+        [data-theme="light"] .modal-content {
+            border: 1px solid rgba(0,0,0,0.05);
+        }
         
-        .modal-content h2 { text-align: center; color: var(--accent-color); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; margin-bottom: 5px;}
+        .modal-content h2 { text-align: center; color: var(--accent-color); text-shadow: 0 1px 4px rgba(0,0,0,0.8); font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; margin-bottom: 5px;}
+        [data-theme="light"] .modal-content h2 { text-shadow: 0 1px 3px rgba(255,255,255,1); }
+
+        .close-btn { position: absolute; top: 5px; right: 10px; background: none; border: none; font-size: 1.5rem; color: var(--text-muted); text-shadow: var(--text-glow); cursor: pointer; transition: all 0.2s ease; border-radius: var(--radius-pill); }
+        .close-btn:active { color: var(--accent-color); transform: scale(0.85); }
         
-        .close-btn {
-            position: absolute; top: 5px; right: 10px;
-            background: none; border: none; font-size: 1.5rem;
-            color: var(--text-muted); cursor: pointer; 
-            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-            border-radius: var(--radius-pill);
+        .credits-section { text-align: center; padding-top: 15px; margin-top: 5px; position: relative; }
+        .credits-section::before {
+            content: ''; position: absolute; top: 0; left: 10%; width: 80%; height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
         }
-        .close-btn:hover, .close-btn:active { color: var(--accent-color); transform: scale(0.85); }
-
-        .settings-content label { display: block; text-align: center; margin-bottom: 6px; font-size: 0.65rem; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;}
-                
-        .theme-btn {
-            width: 100%; background: var(--control-bg); color: var(--accent-color);
-            border: none; box-shadow: var(--glass-shadow); border-radius: var(--radius-sm);
-            font-size: 0.85rem; font-weight: 700; height: 40px; cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-        .theme-btn:active { transform: scale(0.96); }
-
-        /* Credits Section */
-        .credits-section {
-            text-align: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            padding-top: 15px;
-            margin-top: 5px;
-        }
-        [data-theme="light"] .credits-section { border-top: 1px solid rgba(0, 0, 0, 0.08); }
-        .credits-section h3 { font-size: 0.9rem; color: var(--text-color); margin-bottom: 5px; font-weight: 700; }
-        .credits-section p { font-size: 0.7rem; color: var(--text-muted); line-height: 1.6; }
+        [data-theme="light"] .credits-section::before { background: linear-gradient(to right, transparent, rgba(0,0,0,0.15), transparent); }
+        .credits-section h3 { font-size: 0.9rem; color: var(--text-color); text-shadow: var(--text-glow); margin-bottom: 5px; font-weight: 700; }
+        .credits-section p { font-size: 0.7rem; color: var(--text-muted); text-shadow: var(--text-glow); line-height: 1.6; }
         .credits-section .author { font-weight: 700; color: var(--accent-color); margin-top: 6px; }
-
     </style>
 </head>
 <body>
@@ -550,103 +528,115 @@
 
     <div class="controls-grid">
         
-        <div class="control-cell">
-            <label class="main-label">Base Pitch</label>
-            <div class="stepper-card">
-                <button class="stepper-btn" id="pitchUp">+</button>
-                <div class="stepper-display-wrapper">
-                    <select id="pitchSelect" class="pitch-select">
-                        <option value="27.50">A0 (Safed 6)</option>
-                        <option value="29.14">A#0 (Kali 5)</option>
-                        <option value="30.87">B0 (Safed 7)</option>
-                        <option value="32.70">C1 (Safed 1)</option>
-                        <option value="34.65">C#1 (Kali 1)</option>
-                        <option value="36.71">D1 (Safed 2)</option>
-                        <option value="38.89">D#1 (Kali 2)</option>
-                        <option value="41.20">E1 (Safed 3)</option>
-                        <option value="43.65" selected>F1 (Safed 4)</option>
-                        <option value="46.25">F#1 (Kali 3)</option>
-                        <option value="49.00">G1 (Safed 5)</option>
-                        <option value="51.91">G#1 (Kali 4)</option>
-                        <option value="55.00">A1 (Safed 6)</option>
-                        <option value="58.27">A#1 (Kali 5)</option>
-                        <option value="61.74">B1 (Safed 7)</option>
-                        <option value="65.41">C2 (Safed 1)</option>
-                    </select>
-                    <div id="pitchDisplayUI" class="pitch-display">
-                        <div id="pitchMainDisplay" class="pitch-main" style="padding-bottom: 8px;">F<sub>1</sub></div>
-                        <div id="pitchSubDisplay" class="pitch-sub" style="margin-top: 0;">Safed 4</div>
+        <div class="top-row-grid">
+            <div class="control-cell">
+                <label class="main-label">Base pitch</label>
+                <div class="stepper-card">
+                    <button class="stepper-btn" id="pitchUp">+</button>
+                    <div class="stepper-display-wrapper">
+                        <select id="pitchSelect" class="pitch-select">
+                            <option value="27.50">A0 (Safed 6)</option>
+                            <option value="29.14">A#0 (Kali 5)</option>
+                            <option value="30.87">B0 (Safed 7)</option>
+                            <option value="32.70">C1 (Safed 1)</option>
+                            <option value="34.65">C#1 (Kali 1)</option>
+                            <option value="36.71">D1 (Safed 2)</option>
+                            <option value="38.89">D#1 (Kali 2)</option>
+                            <option value="41.20">E1 (Safed 3)</option>
+                            <option value="43.65" selected>F1 (Safed 4)</option>
+                            <option value="46.25">F#1 (Kali 3)</option>
+                            <option value="49.00">G1 (Safed 5)</option>
+                            <option value="51.91">G#1 (Kali 4)</option>
+                            <option value="55.00">A1 (Safed 6)</option>
+                            <option value="58.27">A#1 (Kali 5)</option>
+                            <option value="61.74">B1 (Safed 7)</option>
+                            <option value="65.41">C2 (Safed 1)</option>
+                        </select>
+                        <div id="pitchDisplayUI" class="pitch-display">
+                            <div id="pitchMainDisplay" class="pitch-main" style="padding-bottom: 8px;">F<sub>1</sub></div>
+                            <div id="pitchSubDisplay" class="pitch-sub" style="margin-top: 0;">Safed 4</div>
+                        </div>
                     </div>
+                    <button class="stepper-btn" id="pitchDown">−</button>
                 </div>
-                <button class="stepper-btn" id="pitchDown">−</button>
             </div>
-        </div>
-        
-        <div class="control-cell">
-            <label class="main-label">Tempo</label>
-            <div class="stepper-card">
-                <button class="stepper-btn tempo-btn" data-val="1">+</button>
-                <div class="stepper-display-wrapper">
-                    <div class="tempo-val" id="tempoDisplay" style="padding-bottom: 8px;">70</div>
-                    <div class="pitch-sub" style="margin-top: 0;">BPM</div>
+            
+            <div class="control-cell">
+                <label class="main-label">Tempo</label>
+                <div class="stepper-card">
+                    <button class="stepper-btn tempo-btn" data-val="1">+</button>
+                    <div class="stepper-display-wrapper">
+                        <div class="tempo-val" id="tempoDisplay" style="padding-bottom: 8px;">70</div>
+                        <div class="pitch-sub" style="margin-top: 0;">BPM</div>
+                    </div>
+                    <button class="stepper-btn tempo-btn" data-val="-1">−</button>
                 </div>
-                <button class="stepper-btn tempo-btn" data-val="-1">−</button>
             </div>
         </div>
 
-        <div class="control-cell">
-            <label class="sub-label">First String</label>
-            <div class="horizontal-stepper sub-stepper">
-                <button class="stepper-btn" id="fsPrev">‹</button>
-                <span class="stepper-val" id="fsDisplay">Mandra Pa</span>
-                <button class="stepper-btn" id="fsNext">›</button>
+        <div class="bottom-group-grid">
+            <div class="control-cell">
+                <label class="sub-label">First string</label>
+                <div class="horizontal-stepper">
+                    <button class="stepper-btn" id="fsPrev">‹</button>
+                    <span class="stepper-val" id="fsDisplay">Mandra Pa</span>
+                    <button class="stepper-btn" id="fsNext">›</button>
+                </div>
             </div>
-        </div>
 
-        <div class="control-cell">
-            <label class="sub-label">Middle Strings</label>
-            <div class="horizontal-stepper sub-stepper">
-                <button class="stepper-btn" id="msPrev">‹</button>
-                <span class="stepper-val" id="msDisplay">Shuddha Sa</span>
-                <button class="stepper-btn" id="msNext">›</button>
+            <div class="control-cell">
+                <label class="sub-label">Middle strings</label>
+                <div class="horizontal-stepper">
+                    <button class="stepper-btn" id="msPrev">‹</button>
+                    <span class="stepper-val" id="msDisplay">Shuddha Sa</span>
+                    <button class="stepper-btn" id="msNext">›</button>
+                </div>
             </div>
-        </div>
 
-        <div class="control-cell">
-            <label class="sub-label">Octave</label>
-            <div class="horizontal-stepper sub-stepper">
-                <button class="stepper-btn" id="octavePrev">‹</button>
-                <span class="stepper-val" id="octaveDisplay">Mandra</span>
-                <button class="stepper-btn" id="octaveNext">›</button>
+            <div class="control-cell">
+                <label class="sub-label">Octave</label>
+                <div class="horizontal-stepper">
+                    <button class="stepper-btn" id="octavePrev">‹</button>
+                    <span class="stepper-val" id="octaveDisplay">Madhya</span>
+                    <button class="stepper-btn" id="octaveNext">›</button>
+                </div>
             </div>
-        </div>
 
-        <div class="control-cell">
-            <label class="sub-label">Tone</label>
-            <div class="horizontal-stepper sub-stepper">
-                <button class="stepper-btn" id="tonePrev">‹</button>
-                <span class="stepper-val" id="toneDisplay">Rich</span>
-                <button class="stepper-btn" id="toneNext">›</button>
+            <div class="control-cell">
+                <label class="sub-label">Tone</label>
+                <div class="horizontal-stepper">
+                    <button class="stepper-btn" id="tonePrev">‹</button>
+                    <span class="stepper-val" id="toneDisplay">Rich</span>
+                    <button class="stepper-btn" id="toneNext">›</button>
+                </div>
             </div>
-        </div>
 
-        <div class="control-cell full-width">
-            <label class="sub-label">Rhythm Style</label>
-            <div class="horizontal-stepper sub-stepper">
-                <button class="stepper-btn" id="rhythmPrev">‹</button>
-                <span class="stepper-val" id="rhythmDisplay">Authentic</span>
-                <button class="stepper-btn" id="rhythmNext">›</button>
+            <div class="control-cell full-width">
+                <label class="sub-label">Rhythm style</label>
+                <div class="horizontal-stepper">
+                    <button class="stepper-btn" id="rhythmPrev">‹</button>
+                    <span class="stepper-val" id="rhythmDisplay">Authentic</span>
+                    <button class="stepper-btn" id="rhythmNext">›</button>
+                </div>
             </div>
         </div>
 
     </div>
     
-    <button id="playBtn" class="play-btn">
-        <canvas id="waveCanvas"></canvas>
-        <div class="play-content">
-            <span class="btn-icon">▶</span> <span class="btn-text">Play</span>
+    <div class="play-section">
+        <button id="playBtn" class="play-btn">
+            <canvas id="waveCanvas"></canvas>
+            <div class="play-content">
+                <span class="btn-icon">▶</span> <span class="btn-text">Play</span>
+            </div>
+        </button>
+        <div id="speakerInfo" class="speaker-info">
+            <svg class="speaker-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+            <span id="speakerName">Default Device</span>
         </div>
-    </button>
+    </div>
 </div>
 
 <div id="settingsModal" class="modal-overlay">
@@ -655,12 +645,16 @@
         <h2>Settings</h2>
         
         <div class="control-group">
-            <label>App Theme</label>
-            <button id="themeToggle" class="theme-btn">Auto 🌓</button>
+            <label>App theme</label>
+            <div class="horizontal-stepper">
+                <button class="stepper-btn" id="themePrev">‹</button>
+                <span class="stepper-val" id="themeDisplay">Daylight ⏳</span>
+                <button class="stepper-btn" id="themeNext">›</button>
+            </div>
         </div>
 
-        <div class="control-group">
-            <label>Master Tune</label>
+        <div class="control-group" style="margin-top: 10px;">
+            <label>Master tune</label>
             <div class="horizontal-stepper">
                 <button class="stepper-btn tune-btn" data-val="-1">−</button>
                 <span class="stepper-val" id="tuneDisplay">440 Hz</span>
@@ -668,8 +662,8 @@
             </div>
         </div>
 
-        <div class="control-group">
-            <label>Master Volume</label>
+        <div class="control-group" style="margin-top: 10px;">
+            <label>Master volume</label>
             <div class="horizontal-stepper">
                 <button class="stepper-btn vol-btn" data-val="-0.05">−</button>
                 <span class="stepper-val" id="volDisplay">70%</span>
@@ -723,7 +717,7 @@
         {val: '4', text: 'Madhya'},
         {val: '8', text: 'Taar'}
     ];
-    let octaveIdx = 1; 
+    let octaveIdx = 2; // Defaults to Madhya
 
     const toneOptions = [
         {val: 'rich', text: 'Rich'},
@@ -747,7 +741,6 @@
         document.getElementById('rhythmDisplay').innerText = rhythmOptions[rhythmIdx].text;
     }
 
-    // Helper for cycler buttons
     function setupCycler(prevId, nextId, arr, getIdx, setIdx) {
         document.getElementById(prevId).addEventListener('click', () => {
             setIdx((getIdx() - 1 + arr.length) % arr.length);
@@ -773,7 +766,6 @@
         tempoDisplay.innerText = currentTempo;
     }
 
-    // Custom Pitch Display Formatter
     function updatePitchDisplay() {
         const selectedText = pitchSelect.options[pitchSelect.selectedIndex].text;
         const match = selectedText.match(/^([A-G]#?)(\d)\s*\((.+)\)$/);
@@ -786,7 +778,6 @@
         }
     }
 
-    // Pitch Stepper Logic
     document.getElementById('pitchUp').addEventListener('click', () => {
         if(pitchSelect.selectedIndex < pitchSelect.options.length - 1) {
             pitchSelect.selectedIndex++;
@@ -806,7 +797,6 @@
         saveSettings();
     });
 
-    // Tempo Buttons Logic
     document.querySelectorAll('.tempo-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const change = parseInt(e.target.getAttribute('data-val'));
@@ -816,7 +806,6 @@
         });
     });
 
-    // Tune Buttons Logic
     document.querySelectorAll('.tune-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const change = parseInt(e.target.getAttribute('data-val'));
@@ -826,12 +815,16 @@
         });
     });
 
-    // Volume Buttons Logic
     document.querySelectorAll('.vol-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const change = parseFloat(e.target.getAttribute('data-val'));
             masterVolVal = Math.max(0, Math.min(1, masterVolVal + change));
-            if (masterGain) masterGain.gain.value = masterVolVal;
+            
+            if (masterGain && isPlaying && audioCtx) {
+                masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+                masterGain.gain.linearRampToValueAtTime(masterVolVal, audioCtx.currentTime + 0.1);
+            }
+            
             updateLabels();
             saveSettings();
         });
@@ -869,30 +862,41 @@
 
     document.addEventListener('DOMContentLoaded', loadSettings);
 
-    // --- Dynamic Theme Logic ---
-    const themes = ['auto', 'light', 'dark'];
-    const themeIcons = { 'auto': 'System Auto 🌓', 'light': 'Light Mode ☀️', 'dark': 'Dark Mode 🌙' };
-    let currentTheme = localStorage.getItem('tanpura-theme') || 'auto';
+    // --- Dynamic Theme Logic (Daylight) ---
+    const themes = ['daylight', 'light', 'dark'];
+    const themeIcons = { 'daylight': 'Daylight ⏳', 'light': 'Light ☀️', 'dark': 'Dark 🌙' };
+    let currentTheme = localStorage.getItem('tanpura-theme') || 'daylight';
 
     function applyTheme(theme) {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (theme === 'light' || (theme === 'auto' && !prefersDark)) {
+        const hour = new Date().getHours();
+        const isDaytime = hour >= 6 && hour < 18;
+        
+        let actualTheme = theme;
+        if (theme === 'daylight') {
+            actualTheme = isDaytime ? 'light' : 'dark';
+        }
+
+        if (actualTheme === 'light') {
             document.body.setAttribute('data-theme', 'light');
             document.querySelector('meta[name="theme-color"]').setAttribute('content', '#fcf5f7');
         } else {
             document.body.removeAttribute('data-theme');
             document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0a0305');
         }
-        document.getElementById('themeToggle').innerText = themeIcons[theme];
+        document.getElementById('themeDisplay').innerText = themeIcons[theme];
         localStorage.setItem('tanpura-theme', theme);
     }
 
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-        if (currentTheme === 'auto') applyTheme('auto');
+    document.getElementById('themePrev').addEventListener('click', () => {
+        let idx = themes.indexOf(currentTheme);
+        if (idx === -1) idx = 0;
+        currentTheme = themes[(idx - 1 + themes.length) % themes.length];
+        applyTheme(currentTheme);
     });
 
-    document.getElementById('themeToggle').addEventListener('click', () => {
+    document.getElementById('themeNext').addEventListener('click', () => {
         let idx = themes.indexOf(currentTheme);
+        if (idx === -1) idx = 0;
         currentTheme = themes[(idx + 1) % themes.length];
         applyTheme(currentTheme);
     });
@@ -901,7 +905,6 @@
 
     // --- Modal Logic ---
     const settingsModal = document.getElementById('settingsModal');
-    
     document.getElementById('settingsMenuBtn').addEventListener('click', () => settingsModal.classList.add('show'));
     document.getElementById('closeSettingsModal').addEventListener('click', () => settingsModal.classList.remove('show'));
     settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.remove('show'); });
@@ -955,6 +958,7 @@
             
             masterGain.connect(analyser);
             analyser.connect(audioCtx.destination);
+            
             masterGain.gain.value = masterVolVal;
 
             const n = 64; 
@@ -1134,12 +1138,7 @@
             const middleStringMode = msOptions[msIdx].val;
             const midFreq = saFreq * ratios[middleStringMode];
 
-            const stringFreqs = [ 
-                saFreq * ratios[firstStringMode], 
-                midFreq,                          
-                midFreq,                          
-                saFreq * 0.5                      
-            ];
+            const stringFreqs = [ saFreq * ratios[firstStringMode], midFreq, midFreq, saFreq * 0.5 ];
 
             playStringScheduled(stringFreqs[currentString], pans[currentString], nextNoteTime);
 
@@ -1168,34 +1167,49 @@
             nextNoteTime += delaySeconds;
             currentString = (currentString + 1) % 4;
         }
-
         timerID = setTimeout(schedulerLoop, 25);
     }
 
     function setupMediaSession() {
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
-                title: 'Tanpura Drone',
-                artist: 'Pocket Tanpura',
-                artwork: [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' }]
+                title: 'Tanpura Drone', artist: 'Pocket Tanpura', artwork: [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' }]
             });
             navigator.mediaSession.setActionHandler('play', () => { document.getElementById('playBtn').click(); });
             navigator.mediaSession.setActionHandler('pause', () => { document.getElementById('playBtn').click(); });
         }
     }
 
-    function requestPushNotification() {
-        const asked = localStorage.getItem('tanpura_notif_asked');
-        if (!asked && "Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-            Notification.requestPermission().then(() => {
-                localStorage.setItem('tanpura_notif_asked', 'true');
-            });
+    async function updateSpeakerInfo() {
+        const infoDiv = document.getElementById('speakerInfo');
+        const nameSpan = document.getElementById('speakerName');
+        if (!isPlaying) {
+            infoDiv.style.opacity = '0';
+            return;
+        }
+        
+        try {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) throw new Error("Not supported");
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
+            
+            let label = 'Default Device';
+            if (audioOutputs.length > 0) {
+                const activeOutput = audioOutputs.find(d => d.deviceId === 'default') || audioOutputs[0];
+                if (activeOutput && activeOutput.label) {
+                    label = activeOutput.label;
+                }
+            }
+            nameSpan.innerText = label;
+            infoDiv.style.opacity = '1';
+        } catch (err) {
+            nameSpan.innerText = 'Active Speaker';
+            infoDiv.style.opacity = '1';
         }
     }
 
     document.getElementById('playBtn').addEventListener('click', async () => {
         initAudio();
-        requestPushNotification();
         
         if (audioCtx.state === 'suspended') await audioCtx.resume();
         const btn = document.getElementById('playBtn');
@@ -1203,6 +1217,13 @@
         if (isPlaying) {
             isPlaying = false;
             clearTimeout(timerID);
+            
+            if (masterGain && audioCtx) {
+                masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+                masterGain.gain.setValueAtTime(masterGain.gain.value, audioCtx.currentTime);
+                masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.6);
+            }
+            
             btn.querySelector('.btn-icon').innerText = '▶';
             btn.querySelector('.btn-text').innerText = 'Play';
             btn.classList.remove('playing');
@@ -1211,10 +1232,21 @@
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
             
             document.querySelectorAll('.sphere').forEach(s => s.classList.remove('active'));
+            updateSpeakerInfo();
         } else {
+            if (navigator.vibrate) {
+                navigator.vibrate(100); 
+            }
+
             isPlaying = true;
             currentString = 0;
             nextNoteTime = audioCtx.currentTime + 0.05; 
+            
+            if (masterGain && audioCtx) {
+                masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+                masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+                masterGain.gain.linearRampToValueAtTime(masterVolVal, audioCtx.currentTime + 0.1);
+            }
             
             resizeCanvas(); 
             
@@ -1227,17 +1259,12 @@
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
             
             schedulerLoop();
-            
-            if ("Notification" in window && Notification.permission === "granted") {
-                new Notification("Pocket Tanpura is playing", { icon: "icon-192.png", silent: true });
-            }
+            updateSpeakerInfo();
         }
     });
 
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js').catch(() => {});
-        });
+        window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
     }
 </script>
 
