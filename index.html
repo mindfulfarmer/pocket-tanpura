@@ -290,8 +290,8 @@
             letter-spacing: 1px; 
             color: var(--text-color); 
             opacity: 0.6;
-            text-transform: none; /* Relies on HTML capitalization */
-            text-shadow: none; /* Keep simple and clean */
+            text-transform: none; 
+            text-shadow: none; 
         }
 
         .main-label { margin-bottom: 8px; }
@@ -472,7 +472,7 @@
         .modal-overlay.show { visibility: visible; opacity: 1; }
         
         .modal-content {
-            background: var(--modal-bg); /* Solid visibility */
+            background: var(--modal-bg); 
             border: 1px solid rgba(255,255,255,0.05); border-radius: var(--radius-md); 
             padding: 20px 15px; color: var(--text-color); box-shadow: var(--glass-shadow), 0 20px 50px rgba(0,0,0,0.8);
             position: relative; width: 320px; max-width: 90vw; display: flex; flex-direction: column; gap: 15px;
@@ -487,6 +487,25 @@
         .close-btn { position: absolute; top: 5px; right: 10px; background: none; border: none; font-size: 1.5rem; color: var(--text-muted); text-shadow: var(--text-glow); cursor: pointer; transition: all 0.2s ease; border-radius: var(--radius-pill); }
         .close-btn:active { color: var(--accent-color); transform: scale(0.85); }
         
+        .settings-content label { 
+            display: block; 
+            text-align: center; 
+            margin-bottom: 6px; 
+            font-size: 0.65rem; 
+            letter-spacing: 1px; 
+            color: var(--text-muted); 
+            text-shadow: var(--text-glow); 
+            text-transform: uppercase; 
+            font-weight: 700;
+        }
+        
+        .theme-btn { 
+            width: 100%; background: rgba(0,0,0,0.15); color: var(--accent-color); border: none; 
+            box-shadow: var(--glass-shadow); border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 700; height: 45px; cursor: pointer; transition: all 0.2s ease; 
+        }
+        [data-theme="light"] .theme-btn { background: rgba(255,255,255,0.4); border: none; text-shadow: 0 1px 3px rgba(255,255,255,1); }
+        .theme-btn:active { transform: scale(0.96); }
+
         .credits-section { text-align: center; padding-top: 15px; margin-top: 5px; position: relative; }
         .credits-section::before {
             content: ''; position: absolute; top: 0; left: 10%; width: 80%; height: 1px;
@@ -938,17 +957,17 @@
             dataArray = new Uint8Array(analyser.frequencyBinCount);
             
             reverbGain = audioCtx.createGain();
-            reverbGain.gain.value = 0.15; 
+            reverbGain.gain.value = 0.3; // Increased resonance
 
             const delayNode = audioCtx.createDelay();
-            delayNode.delayTime.value = 0.12; 
+            delayNode.delayTime.value = 0.08; // Snappier gourd resonance
             
             const delayFeedback = audioCtx.createGain();
-            delayFeedback.gain.value = 0.25; 
+            delayFeedback.gain.value = 0.45; // More feedback for ring
             
             const delayFilter = audioCtx.createBiquadFilter();
             delayFilter.type = 'lowpass';
-            delayFilter.frequency.value = 1800; 
+            delayFilter.frequency.value = 1500; 
 
             reverbGain.connect(delayNode);
             delayNode.connect(delayFilter);
@@ -965,10 +984,12 @@
             const real = new Float32Array(n);
             const imag = new Float32Array(n);
             for (let i = 1; i < n; i++) {
-                let amp = 1 / Math.pow(i, 1.25); 
-                if (i === 2 || i === 3) amp *= 1.6; 
-                if (i >= 5 && i <= 8) amp *= 1.9; 
-                if (i >= 12 && i <= 16) amp *= 1.4; 
+                let amp = 1 / Math.pow(i, 1.3); // Smoother base curve
+                if (i === 1) amp = 1.0;
+                if (i === 2) amp = 0.6;
+                if (i === 3) amp = 0.45;
+                if (i >= 4 && i <= 9) amp *= 2.8; // Enhance Jawari formants
+                if (i >= 10 && i <= 18) amp *= 1.5; 
                 real[i] = amp;
             }
             window.tanpuraWave = audioCtx.createPeriodicWave(real, imag);
@@ -1051,8 +1072,11 @@
         oscDetuneFlat.setPeriodicWave(window.tanpuraWave);
         
         oscMain.frequency.value = freq;
-        oscDetuneSharp.frequency.value = freq * 1.0025; 
-        oscDetuneFlat.frequency.value = freq * 0.9975; 
+        
+        // Organic detune variance to remove perfect mechanical phasing
+        const detuneVariance = 1.002 + (Math.random() * 0.001); 
+        oscDetuneSharp.frequency.value = freq * detuneVariance; 
+        oscDetuneFlat.frequency.value = freq * (2 - detuneVariance);
 
         const mainGain = audioCtx.createGain(); 
         const detuneSharpGain = audioCtx.createGain();
@@ -1069,22 +1093,22 @@
 
         if (toneType === 'rich') {
             mainGain.gain.value = 0.45; detuneSharpGain.gain.value = 0.27; detuneFlatGain.gain.value = 0.27;
-            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 3.5; bodyFilter.Q.value = 1.8; bodyFilter.gain.value = 7;
-            formantFilter.type = 'peaking'; formantFilter.frequency.value = freq * 6; formantFilter.Q.value = 1.5; formantFilter.gain.value = 4;
-            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 1.8;
-            jawariPeakMax = freq * 22; jawariEndFreq = freq * 1.5; decayTime = 12.0; 
+            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 3.5; bodyFilter.Q.value = 1.4; bodyFilter.gain.value = 8;
+            formantFilter.type = 'peaking'; formantFilter.frequency.value = freq * 6; formantFilter.Q.value = 1.2; formantFilter.gain.value = 5;
+            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 1.5;
+            jawariPeakMax = freq * 24; jawariEndFreq = freq * 2.0; decayTime = 18.0; 
         } else if (toneType === 'mellow') {
             mainGain.gain.value = 0.6; detuneSharpGain.gain.value = 0.2; detuneFlatGain.gain.value = 0.2;
-            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 2.5; bodyFilter.Q.value = 1.2; bodyFilter.gain.value = 5;
-            formantFilter.type = 'peaking'; formantFilter.frequency.value = freq * 4; formantFilter.Q.value = 1.0; formantFilter.gain.value = 2;
-            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 1.0;
-            jawariPeakMax = freq * 10; jawariEndFreq = freq * 1.2; decayTime = 10.0;
+            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 2.5; bodyFilter.Q.value = 1.0; bodyFilter.gain.value = 6;
+            formantFilter.type = 'peaking'; formantFilter.frequency.value = freq * 4; formantFilter.Q.value = 0.8; formantFilter.gain.value = 3;
+            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 0.8;
+            jawariPeakMax = freq * 12; jawariEndFreq = freq * 1.5; decayTime = 16.0;
         } else { 
             mainGain.gain.value = 0.7; detuneSharpGain.gain.value = 0.15; detuneFlatGain.gain.value = 0.15;
-            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 1.5; bodyFilter.Q.value = 0.8; bodyFilter.gain.value = 3;
-            formantFilter.type = 'peaking'; formantFilter.frequency.value = freq * 2; formantFilter.Q.value = 0.5; formantFilter.gain.value = 1;
+            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 1.5; bodyFilter.Q.value = 0.6; bodyFilter.gain.value = 4;
+            formantFilter.type = 'peaking'; formantFilter.frequency.value = freq * 2; formantFilter.Q.value = 0.4; formantFilter.gain.value = 2;
             jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 0.5;
-            jawariPeakMax = freq * 5; jawariEndFreq = freq * 1.0; decayTime = 8.0;
+            jawariPeakMax = freq * 6; jawariEndFreq = freq * 1.0; decayTime = 14.0;
         }
 
         oscMain.connect(mainGain); 
@@ -1104,19 +1128,19 @@
         if(panner.pan) panner.pan.value = panValue; 
         else { panner.setPosition(panValue, 0, 1 - Math.abs(panValue)); }
 
-        jawariFilter.frequency.setValueAtTime(freq * 3, startTime);
-        jawariFilter.frequency.linearRampToValueAtTime(jawariPeakMax, startTime + 0.8); 
-        jawariFilter.frequency.exponentialRampToValueAtTime(jawariEndFreq, startTime + decayTime); 
+        jawariFilter.frequency.setValueAtTime(freq * 2, startTime);
+        jawariFilter.frequency.linearRampToValueAtTime(jawariPeakMax, startTime + 1.2); // Slower bloom
+        jawariFilter.frequency.exponentialRampToValueAtTime(jawariEndFreq, startTime + decayTime * 0.7); 
 
         envGain.gain.setValueAtTime(0, startTime);
-        envGain.gain.linearRampToValueAtTime(1, startTime + 0.1); 
-        envGain.gain.exponentialRampToValueAtTime(0.35, startTime + 1.2); 
+        envGain.gain.linearRampToValueAtTime(1, startTime + 0.15); // Softer attack
+        envGain.gain.exponentialRampToValueAtTime(0.7, startTime + 2.5); // Sustained resonance (much less initial drop)
         envGain.gain.exponentialRampToValueAtTime(0.001, startTime + decayTime); 
 
         const volModOsc = audioCtx.createOscillator();
-        volModOsc.frequency.value = freq / 200; 
+        volModOsc.frequency.value = freq / (250 + (Math.random() * 50)); // More organic modulation
         const volModDepth = audioCtx.createGain();
-        volModDepth.gain.value = 0.05; 
+        volModDepth.gain.value = 0.06; // Subtle organic beating
         volModOsc.connect(volModDepth);
         volModDepth.connect(envGain.gain);
 
