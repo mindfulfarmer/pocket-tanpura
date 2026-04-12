@@ -135,32 +135,6 @@
             opacity: calc(0.15 + (var(--audio-intensity) * 0.3)); 
         }
 
-        /* --- FLOATING SPHERES --- */
-        .spheres-layer {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: -2; pointer-events: none; overflow: hidden;
-        }
-        .sphere-wrapper { position: absolute; width: 100%; height: 100%; }
-        .sphere {
-            position: absolute; border-radius: 50%;
-            opacity: 0.04; filter: blur(15px);
-            transition: transform 2.5s cubic-bezier(0.1, 1, 0.3, 1), opacity 2.5s ease;
-        }
-        
-        .sw0 { animation: floatS 12s infinite alternate ease-in-out; }
-        .sw1 { animation: floatS 14s infinite alternate-reverse ease-in-out; }
-        .sw2 { animation: floatS 11s infinite alternate ease-in-out; }
-        .sw3 { animation: floatS 16s infinite alternate-reverse ease-in-out; }
-        
-        @keyframes floatS { 0% { transform: translateY(10vh) translateX(-5vw); } 100% { transform: translateY(-10vh) translateX(5vw); } }
-
-        #sphere0 { width: 45vw; height: 45vw; top: 15%; left: 5%; background: radial-gradient(circle, var(--shape-1) 0%, transparent 65%);}
-        #sphere1 { width: 50vw; height: 50vw; top: 45%; right: 5%; background: radial-gradient(circle, var(--shape-2) 0%, transparent 65%);}
-        #sphere2 { width: 40vw; height: 40vw; bottom: 10%; left: 15%; background: radial-gradient(circle, var(--shape-1) 0%, transparent 65%);}
-        #sphere3 { width: 60vw; height: 60vw; top: 30%; left: 30%; background: radial-gradient(circle, var(--shape-2) 0%, transparent 65%);}
-
-        .sphere.active { opacity: 0.4; transform: scale(1.6); transition: none; }
-
         .bg-vignette {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: radial-gradient(circle at center, transparent 10%, rgba(0,0,0,0.92) 150%);
@@ -263,7 +237,7 @@
             
             background: var(--control-bg);
             border-radius: var(--radius-lg);
-            padding: max(1.5vh, 12px) max(3vh, 24px); /* Increased side paddings */
+            padding: max(2.5vh, 20px) max(3vh, 24px); /* Increased side paddings */
             box-shadow: var(--glass-shadow);
             border: none;
             backdrop-filter: blur(40px) saturate(150%);
@@ -524,13 +498,6 @@
     <div class="drift-container mover2"><div class="bg-shape shape2"></div></div>
 </div>
 
-<div class="spheres-layer">
-    <div class="sphere-wrapper sw0"><div class="sphere" id="sphere0"></div></div>
-    <div class="sphere-wrapper sw1"><div class="sphere" id="sphere1"></div></div>
-    <div class="sphere-wrapper sw2"><div class="sphere" id="sphere2"></div></div>
-    <div class="sphere-wrapper sw3"><div class="sphere" id="sphere3"></div></div>
-</div>
-
 <div class="bg-vignette"></div>
 
 <div class="app-container">
@@ -572,7 +539,7 @@
                             <option value="65.41">C2 (Safed 1)</option>
                         </select>
                         <div id="pitchDisplayUI" class="pitch-display">
-                            <div id="pitchMainDisplay" class="pitch-main" style="padding-bottom: 8px;">F<sub>1</sub></div>
+                            <div id="pitchMainDisplay" class="pitch-main" style="padding-bottom: 16px;">F<sub>1</sub></div>
                             <div id="pitchSubDisplay" class="pitch-sub" style="margin-top: 0;">Safed 4</div>
                         </div>
                     </div>
@@ -585,7 +552,7 @@
                 <div class="stepper-card">
                     <button class="stepper-btn tempo-btn" data-val="1">+</button>
                     <div class="stepper-display-wrapper">
-                        <div class="tempo-val" id="tempoDisplay" style="padding-bottom: 8px;">70</div>
+                        <div class="tempo-val" id="tempoDisplay" style="padding-bottom: 16px;">70</div>
                         <div class="pitch-sub" style="margin-top: 0;">BPM</div>
                     </div>
                     <button class="stepper-btn tempo-btn" data-val="-1">−</button>
@@ -785,6 +752,8 @@
         tempoDisplay.innerText = currentTempo;
     }
 
+    let currentBaseFreq = 43.65; // Default to F1
+
     function updatePitchDisplay() {
         const selectedText = pitchSelect.options[pitchSelect.selectedIndex].text;
         const match = selectedText.match(/^([A-G]#?)(\d)\s*\((.+)\)$/);
@@ -795,6 +764,7 @@
             pitchMainDisplay.innerText = selectedText;
             pitchSubDisplay.innerText = '';
         }
+        currentBaseFreq = parseFloat(pitchSelect.value); 
     }
 
     document.getElementById('pitchUp').addEventListener('click', () => {
@@ -957,25 +927,45 @@
             analyser.fftSize = 128; 
             dataArray = new Uint8Array(analyser.frequencyBinCount);
             
+            // Global Stereo Reverb/Chorus Effect for wide 3D space on speakers
             reverbGain = audioCtx.createGain();
-            reverbGain.gain.value = 0.3; // Increased resonance
+            reverbGain.gain.value = 0.55; 
 
-            const delayNode = audioCtx.createDelay();
-            delayNode.delayTime.value = 0.08; // Snappier gourd resonance
+            const delayL = audioCtx.createDelay();
+            delayL.delayTime.value = 0.035; // 35ms left delay
+            const feedbackL = audioCtx.createGain();
+            feedbackL.gain.value = 0.4;
             
-            const delayFeedback = audioCtx.createGain();
-            delayFeedback.gain.value = 0.45; // More feedback for ring
-            
-            const delayFilter = audioCtx.createBiquadFilter();
-            delayFilter.type = 'lowpass';
-            delayFilter.frequency.value = 1500; 
+            const delayR = audioCtx.createDelay();
+            delayR.delayTime.value = 0.050; // 50ms right delay
+            const feedbackR = audioCtx.createGain();
+            feedbackR.gain.value = 0.4;
 
-            reverbGain.connect(delayNode);
-            delayNode.connect(delayFilter);
-            delayFilter.connect(delayFeedback);
-            delayFeedback.connect(delayNode);
-            delayNode.connect(masterGain);
+            const filterL = audioCtx.createBiquadFilter();
+            filterL.type = 'lowpass';
+            filterL.frequency.value = 2500;
             
+            const filterR = audioCtx.createBiquadFilter();
+            filterR.type = 'lowpass';
+            filterR.frequency.value = 2500;
+
+            const merger = audioCtx.createChannelMerger(2);
+
+            // Left Space Routing
+            reverbGain.connect(delayL);
+            delayL.connect(filterL);
+            filterL.connect(feedbackL);
+            feedbackL.connect(delayL);
+            delayL.connect(merger, 0, 0); 
+
+            // Right Space Routing
+            reverbGain.connect(delayR);
+            delayR.connect(filterR);
+            filterR.connect(feedbackR);
+            feedbackR.connect(delayR);
+            delayR.connect(merger, 0, 1); 
+
+            merger.connect(masterGain);
             masterGain.connect(analyser);
             
             // Route the audio into a MediaStream instead of the default hardware destination
@@ -990,13 +980,22 @@
             const n = 64; 
             const real = new Float32Array(n);
             const imag = new Float32Array(n);
+            
             for (let i = 1; i < n; i++) {
-                let amp = 1 / Math.pow(i, 1.3); // Smoother base curve
-                if (i === 1) amp = 1.0;
-                if (i === 2) amp = 0.6;
-                if (i === 3) amp = 0.45;
-                if (i >= 4 && i <= 9) amp *= 2.8; // Enhance Jawari formants
-                if (i >= 10 && i <= 18) amp *= 1.5; 
+                // Natural acoustic decay curve for string fundamentals
+                let amp = 1.0 / Math.pow(i, 1.4); 
+                
+                if (i === 1) amp = 1.0;   // Fundamental
+                if (i === 2) amp = 0.6;   // Octave
+                if (i === 3) amp = 0.45;  // Fifth (Very prominent in Tanpura)
+                if (i === 4) amp = 0.3;   // Second Octave
+                if (i === 5) amp = 0.25;  // Major Third
+                
+                // Formant peak mapping to naturally simulate the Jivari (buzzing bridge)
+                if (i >= 6 && i <= 15) {
+                    amp *= 1 + 1.5 * Math.sin(Math.PI * (i - 6) / 9); 
+                }
+                
                 real[i] = amp;
             }
             window.tanpuraWave = audioCtx.createPeriodicWave(real, imag);
@@ -1070,89 +1069,97 @@
         if (!audioCtx) return;
         const toneType = toneOptions[toneIdx].val;
 
-        const oscMain = audioCtx.createOscillator();
-        const oscDetuneSharp = audioCtx.createOscillator();
-        const oscDetuneFlat = audioCtx.createOscillator();
+        // Use 3 oscillators for natural chorused thickness of a thick metal string
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const osc3 = audioCtx.createOscillator();
         
-        oscMain.setPeriodicWave(window.tanpuraWave);
-        oscDetuneSharp.setPeriodicWave(window.tanpuraWave);
-        oscDetuneFlat.setPeriodicWave(window.tanpuraWave);
+        osc1.setPeriodicWave(window.tanpuraWave);
+        osc2.setPeriodicWave(window.tanpuraWave);
+        osc3.setPeriodicWave(window.tanpuraWave);
         
-        oscMain.frequency.value = freq;
-        
-        // Organic detune variance to remove perfect mechanical phasing
-        const detuneVariance = 1.002 + (Math.random() * 0.001); 
-        oscDetuneSharp.frequency.value = freq * detuneVariance; 
-        oscDetuneFlat.frequency.value = freq * (2 - detuneVariance);
+        // Micro-detuning creates an organic acoustic warmth 
+        osc1.frequency.value = freq;
+        osc2.frequency.value = freq * 1.0012;
+        osc3.frequency.value = freq * 0.9988;
 
-        const mainGain = audioCtx.createGain(); 
-        const detuneSharpGain = audioCtx.createGain();
-        const detuneFlatGain = audioCtx.createGain();
+        const mixGain = audioCtx.createGain();
+        mixGain.gain.value = 0.33; // Prevent clipping
         
+        osc1.connect(mixGain);
+        osc2.connect(mixGain);
+        osc3.connect(mixGain);
+
+        // Acoustic Body and Natural String Decay Filters
         const bodyFilter = audioCtx.createBiquadFilter(); 
-        const formantFilter = audioCtx.createBiquadFilter(); 
-        const jawariFilter = audioCtx.createBiquadFilter(); 
+        bodyFilter.type = 'peaking';
         
+        const stringLowpass = audioCtx.createBiquadFilter(); 
+        stringLowpass.type = 'lowpass';
+
         const panner = audioCtx.createStereoPanner ? audioCtx.createStereoPanner() : audioCtx.createPanner();
         const envGain = audioCtx.createGain();
 
-        let jawariPeakMax, jawariEndFreq, decayTime;
+        let lpStartFreq, lpEndFreq, decayTime;
 
         if (toneType === 'rich') {
-            mainGain.gain.value = 0.45; detuneSharpGain.gain.value = 0.27; detuneFlatGain.gain.value = 0.27;
-            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 3.5; bodyFilter.Q.value = 1.4; bodyFilter.gain.value = 8;
-            formantFilter.type = 'peaking'; formantFilter.frequency.value = freq * 6; formantFilter.Q.value = 1.2; formantFilter.gain.value = 5;
-            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 1.5;
-            jawariPeakMax = freq * 24; jawariEndFreq = freq * 2.0; decayTime = 18.0; 
+            bodyFilter.frequency.value = freq * 3; bodyFilter.Q.value = 1.2; bodyFilter.gain.value = 4;
+            lpStartFreq = freq * 16; lpEndFreq = freq * 2.5; decayTime = 18.0; 
         } else if (toneType === 'mellow') {
-            mainGain.gain.value = 0.6; detuneSharpGain.gain.value = 0.2; detuneFlatGain.gain.value = 0.2;
-            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 2.5; bodyFilter.Q.value = 1.0; bodyFilter.gain.value = 6;
-            formantFilter.type = 'peaking'; formantFilter.frequency.value = freq * 4; formantFilter.Q.value = 0.8; formantFilter.gain.value = 3;
-            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 0.8;
-            jawariPeakMax = freq * 12; jawariEndFreq = freq * 1.5; decayTime = 16.0;
-        } else { 
-            mainGain.gain.value = 0.7; detuneSharpGain.gain.value = 0.15; detuneFlatGain.gain.value = 0.15;
-            bodyFilter.type = 'peaking'; bodyFilter.frequency.value = freq * 1.5; bodyFilter.Q.value = 0.6; bodyFilter.gain.value = 4;
-            formantFilter.type = 'peaking'; formantFilter.frequency.value = freq * 2; formantFilter.Q.value = 0.4; formantFilter.gain.value = 2;
-            jawariFilter.type = 'lowpass'; jawariFilter.Q.value = 0.5;
-            jawariPeakMax = freq * 6; jawariEndFreq = freq * 1.0; decayTime = 14.0;
+            bodyFilter.frequency.value = freq * 2.5; bodyFilter.Q.value = 1.0; bodyFilter.gain.value = 2;
+            lpStartFreq = freq * 10; lpEndFreq = freq * 1.8; decayTime = 16.0;
+        } else { // deep
+            bodyFilter.frequency.value = freq * 2; bodyFilter.Q.value = 0.8; bodyFilter.gain.value = 1;
+            lpStartFreq = freq * 6; lpEndFreq = freq * 1.2; decayTime = 14.0;
         }
 
-        oscMain.connect(mainGain); 
-        oscDetuneSharp.connect(detuneSharpGain);
-        oscDetuneFlat.connect(detuneFlatGain);
-        mainGain.connect(bodyFilter); 
-        detuneSharpGain.connect(bodyFilter);
-        detuneFlatGain.connect(bodyFilter);
-        bodyFilter.connect(formantFilter);
-        formantFilter.connect(jawariFilter);
-        jawariFilter.connect(panner);
+        mixGain.connect(bodyFilter);
+        bodyFilter.connect(stringLowpass);
+        stringLowpass.connect(panner);
         panner.connect(envGain);
         
         envGain.connect(masterGain); 
-        envGain.connect(reverbGain);
+        envGain.connect(reverbGain); // Feed into global stereo space
         
-        if(panner.pan) panner.pan.value = panValue; 
-        else { panner.setPosition(panValue, 0, 1 - Math.abs(panValue)); }
+        if(panner.pan) {
+            panner.pan.value = panValue; 
+        } else { 
+            panner.setPosition(panValue, 0, 1 - Math.abs(panValue)); 
+        }
 
-        jawariFilter.frequency.setValueAtTime(freq * 2, startTime);
-        jawariFilter.frequency.linearRampToValueAtTime(jawariPeakMax, startTime + 1.2); // Slower bloom
-        jawariFilter.frequency.exponentialRampToValueAtTime(jawariEndFreq, startTime + decayTime * 0.7); 
+        // Smooth Acoustic Filter Decay (The natural closing of the Jivari sound)
+        stringLowpass.Q.value = 0.7; 
+        stringLowpass.frequency.setValueAtTime(lpStartFreq, startTime);
+        stringLowpass.frequency.linearRampToValueAtTime(lpStartFreq * 1.1, startTime + 0.15); // Tiny bloom
+        stringLowpass.frequency.exponentialRampToValueAtTime(lpEndFreq, startTime + decayTime * 0.7); 
 
+        // Acoustic Amplitude Envelope
         envGain.gain.setValueAtTime(0, startTime);
-        envGain.gain.linearRampToValueAtTime(1, startTime + 0.15); // Softer attack
-        envGain.gain.exponentialRampToValueAtTime(0.7, startTime + 2.5); // Sustained resonance (much less initial drop)
-        envGain.gain.exponentialRampToValueAtTime(0.001, startTime + decayTime); 
+        envGain.gain.linearRampToValueAtTime(1, startTime + 0.12); // Soft finger pluck
+        envGain.gain.exponentialRampToValueAtTime(0.5, startTime + 2.5); // Initial tension drop
+        envGain.gain.exponentialRampToValueAtTime(0.001, startTime + decayTime); // Long trailing tail
 
+        // Organic volume modulation to simulate string beating against the bridge
         const volModOsc = audioCtx.createOscillator();
-        volModOsc.frequency.value = freq / (250 + (Math.random() * 50)); // More organic modulation
+        volModOsc.frequency.value = 0.5 + (Math.random() * 0.5); 
         const volModDepth = audioCtx.createGain();
-        volModDepth.gain.value = 0.06; // Subtle organic beating
+        volModDepth.gain.value = 0.04; 
         volModOsc.connect(volModDepth);
         volModDepth.connect(envGain.gain);
 
-        oscMain.start(startTime); oscDetuneSharp.start(startTime); oscDetuneFlat.start(startTime); volModOsc.start(startTime);
-        oscMain.stop(startTime + decayTime); oscDetuneSharp.stop(startTime + decayTime); oscDetuneFlat.stop(startTime + decayTime); volModOsc.stop(startTime + decayTime);
+        osc1.start(startTime); osc2.start(startTime); osc3.start(startTime); volModOsc.start(startTime);
+        osc1.stop(startTime + decayTime); osc2.stop(startTime + decayTime); osc3.stop(startTime + decayTime); volModOsc.stop(startTime + decayTime);
+    
+        osc1.onended = () => {
+            mixGain.disconnect();
+            bodyFilter.disconnect();
+            stringLowpass.disconnect();
+            panner.disconnect();
+            envGain.disconnect();
+            volModOsc.disconnect();
+            volModDepth.disconnect();
+        };
+
     }
 
     function schedulerLoop() {
@@ -1160,7 +1167,7 @@
         
         while (nextNoteTime < audioCtx.currentTime + 1.5) {
             
-            const rawBaseFreq = parseFloat(document.getElementById('pitchSelect').value);
+            const rawBaseFreq = currentBaseFreq;
             const octaveMult = parseFloat(octaveOptions[octaveIdx].val);
             const tuneRatio = masterTuneVal / 440;
             
@@ -1172,18 +1179,6 @@
             const stringFreqs = [ saFreq * ratios[firstStringMode], midFreq, midFreq, saFreq * 0.5 ];
 
             playStringScheduled(stringFreqs[currentString], pans[currentString], nextNoteTime);
-
-            const noteIndex = currentString;
-            const uiDelay = (nextNoteTime - audioCtx.currentTime) * 1000;
-            
-            setTimeout(() => {
-                if(!isPlaying) return;
-                const sphere = document.getElementById('sphere' + noteIndex);
-                if (sphere) {
-                    sphere.classList.add('active');
-                    setTimeout(() => sphere.classList.remove('active'), 50); 
-                }
-            }, Math.max(0, uiDelay));
 
             const cycleDuration = 240000 / currentTempo; 
             const style = rhythmOptions[rhythmIdx].val;
@@ -1273,7 +1268,6 @@
             nativeAudioElement.pause();
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
             
-            document.querySelectorAll('.sphere').forEach(s => s.classList.remove('active'));
             updateSpeakerInfo();
         } else {
             // Haptic feedback when play is pressed
