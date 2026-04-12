@@ -936,9 +936,9 @@
     let currentString = 0;
     let wakeLock = null;
     
-    const silentWavBase64 = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-    const bgKeepAliveAudio = new Audio(silentWavBase64);
-    bgKeepAliveAudio.loop = true;
+    // Create a native HTML5 Audio element to hold our stream
+    const nativeAudioElement = new Audio();
+    nativeAudioElement.playsInline = true; // Crucial for iOS background playback
     
     const ratios = { 
         'Pa_lower': 0.75, 'Ma_lower': 0.6666, 'Ni_lower': 0.9375, 
@@ -977,7 +977,13 @@
             delayNode.connect(masterGain);
             
             masterGain.connect(analyser);
-            analyser.connect(audioCtx.destination);
+            
+            // Route the audio into a MediaStream instead of the default hardware destination
+            const streamDestination = audioCtx.createMediaStreamDestination();
+            analyser.connect(streamDestination);
+            
+            // Attach the live stream to our native HTML5 Audio element
+            nativeAudioElement.srcObject = streamDestination.stream;
             
             masterGain.gain.value = masterVolVal;
 
@@ -1263,7 +1269,8 @@
             btn.querySelector('.btn-text').innerText = 'Play';
             btn.classList.remove('playing');
             
-            bgKeepAliveAudio.pause();
+            // Pause the native element
+            nativeAudioElement.pause();
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
             
             document.querySelectorAll('.sphere').forEach(s => s.classList.remove('active'));
@@ -1294,7 +1301,8 @@
             btn.querySelector('.btn-text').innerText = 'Stop';
             btn.classList.add('playing');
             
-            bgKeepAliveAudio.play().catch(e => console.log('Keep-alive prevented', e));
+            // Play the native element to trigger OS Media Controls
+            nativeAudioElement.play().catch(e => console.log('Media play prevented', e));
             setupMediaSession();
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
             
