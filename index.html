@@ -153,7 +153,8 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between; 
-            padding: max(env(safe-area-inset-top), 4vh) 1.5rem max(env(safe-area-inset-bottom), 4vh);
+            /* Removed large bottom padding, keeping only safe-area for mobile nav bar */
+            padding: max(env(safe-area-inset-top), 4vh) 1.5rem env(safe-area-inset-bottom, 12px);
             z-index: 1;
             position: relative;
             overflow: hidden;
@@ -648,15 +649,6 @@
             </div>
         </div>
 
-        <div class="control-group" style="margin-top: 10px;">
-            <label>Master volume</label>
-            <div class="horizontal-stepper">
-                <button class="stepper-btn vol-btn" data-val="-0.05">−</button>
-                <span class="stepper-val" id="volDisplay">70%</span>
-                <button class="stepper-btn vol-btn" data-val="0.05">+</button>
-            </div>
-        </div>
-
         <div class="credits-section">
             <h3>Pocket Tanpura</h3>
             <p class="author">Designed by Bhaskarjyoti Das</p>
@@ -668,7 +660,6 @@
 <script>
     // --- UI Listeners & Updates ---
     const tuneDisplay = document.getElementById('tuneDisplay');
-    const volDisplay = document.getElementById('volDisplay');
     const tempoDisplay = document.getElementById('tempoDisplay');
     const pitchSelect = document.getElementById('pitchSelect');
     const pitchMainDisplay = document.getElementById('pitchMainDisplay');
@@ -676,7 +667,7 @@
 
     let currentTempo = 70;
     let masterTuneVal = 440;
-    let masterVolVal = 0.7;
+    const SAFE_MASTER_VOL = 0.6; // Hardcoded safe volume level to prevent distortion
 
     // --- Data Arrays for Sub Controls ---
     const fsOptions = [
@@ -748,7 +739,6 @@
 
     function updateLabels() {
         tuneDisplay.innerText = `${masterTuneVal} Hz`;
-        volDisplay.innerText = `${Math.round(masterVolVal * 100)}%`;
         tempoDisplay.innerText = currentTempo;
     }
 
@@ -804,21 +794,6 @@
         });
     });
 
-    document.querySelectorAll('.vol-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const change = parseFloat(e.target.getAttribute('data-val'));
-            masterVolVal = Math.max(0, Math.min(1, masterVolVal + change));
-            
-            if (masterGain && isPlaying && audioCtx) {
-                masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
-                masterGain.gain.linearRampToValueAtTime(masterVolVal, audioCtx.currentTime + 0.1);
-            }
-            
-            updateLabels();
-            saveSettings();
-        });
-    });
-
     // --- State & Storage ---
     function saveSettings() {
         localStorage.setItem('tanpura_fsIdx', fsIdx);
@@ -829,7 +804,6 @@
         localStorage.setItem('tanpura_pitchIdx', pitchSelect.selectedIndex);
         localStorage.setItem('tanpura_tempo', currentTempo);
         localStorage.setItem('tanpura_tune', masterTuneVal);
-        localStorage.setItem('tanpura_vol', masterVolVal);
     }
 
     function loadSettings() {
@@ -842,7 +816,6 @@
         
         if(localStorage.getItem('tanpura_tempo')) currentTempo = parseInt(localStorage.getItem('tanpura_tempo'));
         if(localStorage.getItem('tanpura_tune')) masterTuneVal = parseInt(localStorage.getItem('tanpura_tune'));
-        if(localStorage.getItem('tanpura_vol')) masterVolVal = parseFloat(localStorage.getItem('tanpura_vol'));
         
         updatePitchDisplay();
         updateAllSubDisplays();
@@ -975,7 +948,7 @@
             // Attach the live stream to our native HTML5 Audio element
             nativeAudioElement.srcObject = streamDestination.stream;
             
-            masterGain.gain.value = masterVolVal;
+            masterGain.gain.value = SAFE_MASTER_VOL;
 
             const n = 64; 
             const real = new Float32Array(n);
@@ -1286,7 +1259,7 @@
             if (masterGain && audioCtx) {
                 masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
                 masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
-                masterGain.gain.linearRampToValueAtTime(masterVolVal, audioCtx.currentTime + 0.1);
+                masterGain.gain.linearRampToValueAtTime(SAFE_MASTER_VOL, audioCtx.currentTime + 0.1);
             }
             
             resizeCanvas(); 
